@@ -68,7 +68,8 @@ export function Card({
           src={cardImage}
           alt={faceUp && card ? `${card} card` : "Card back"}
           fill
-          className="rounded-lg object-contain"
+          draggable={false}
+          className="rounded-lg object-contain select-none"
           unoptimized // SVGs don't need optimization
         />
       </div>
