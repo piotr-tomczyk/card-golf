@@ -17,6 +17,7 @@ import { TurnIndicator } from "./TurnIndicator";
 import { ActionBar, type TurnState } from "./ActionBar";
 import { ScoreBoard } from "./ScoreBoard";
 import { api, type RouterOutputs } from "@/trpc/react";
+import { CARD_VALUES, getRank } from "@/server/game/types";
 
 type GameState = RouterOutputs["game"]["getByCode"];
 
@@ -120,6 +121,35 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
 
   const opponent = game.players.find((p) => p.id !== currentPlayer.id);
 
+  // Calculate live round score from face-up cards only
+  const calcRoundScore = (hand: { card: string | null; faceUp: boolean }[]) => {
+    const cols = game.config.gridCols;
+    const rows = hand.length / cols;
+    let total = 0;
+
+    for (let col = 0; col < cols; col++) {
+      const colCards: string[] = [];
+      for (let row = 0; row < rows; row++) {
+        const slot = hand[row * cols + col];
+        if (slot?.faceUp && slot.card) colCards.push(slot.card);
+      }
+      if (colCards.length === 0) continue;
+
+      const firstRank = getRank(colCards[0]! as Parameters<typeof getRank>[0]);
+      const allMatch = colCards.every(
+        (c) => getRank(c as Parameters<typeof getRank>[0]) === firstRank,
+      );
+
+      if (allMatch && colCards.length > 1) continue;
+
+      for (const c of colCards) {
+        const rank = getRank(c as Parameters<typeof getRank>[0]);
+        total += CARD_VALUES[rank] ?? 0;
+      }
+    }
+    return total;
+  };
+
   const handleDrawFromDeck = () => {
     drawCard.mutate({ gameId: game.id });
   };
@@ -165,18 +195,21 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
-    const { over } = event;
+    const { active, over } = event;
     if (!over || isPending) return;
 
+    const activeData = active.data.current;
     const overData = over.data.current;
 
     if (overData?.type === "hand-position") {
       const position = overData.position as number;
-      if (turnState === "holding_drawn_card") {
+      if (activeData?.type === "drawn-card" && turnState === "holding_drawn_card") {
         placeDrawnCard.mutate({ gameId: game.id, position });
+      } else if (activeData?.type === "discard-card" && turnState === "idle") {
+        takeDiscardAndReplace.mutate({ gameId: game.id, position });
       }
     } else if (overData?.type === "discard-zone") {
-      if (turnState === "holding_drawn_card") {
+      if (activeData?.type === "drawn-card" && turnState === "holding_drawn_card") {
         discardDrawnCard.mutate({ gameId: game.id });
       }
     }
@@ -192,11 +225,14 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
     discardDrawnCard.isPending ||
     uncoverCard.isPending;
 
-  // Hand positions are droppable when holding a drawn card or choosing replacement
+  // Hand positions are droppable when holding a drawn card, choosing replacement,
+  // or idle with a discard card available (for drag from discard pile)
   const droppablePositions =
     turnState === "holding_drawn_card" || turnState === "choosing_replacement"
       ? currentPlayer.hand.map((_, i) => i)
-      : [];
+      : turnState === "idle" && isYourTurn && topDiscard
+        ? currentPlayer.hand.map((_, i) => i)
+        : [];
 
   // Hand positions are selectable when holding drawn card, choosing replacement,
   // or idle (for face-down card reveal)
@@ -228,7 +264,7 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
             <div className="rounded-lg bg-green-900/30 p-4">
               <PlayerHand
                 cards={opponent.hand}
-                label={`${opponent.displayName} (${opponent.totalScore} pts)`}
+                label={`${opponent.displayName} (${calcRoundScore(opponent.hand)} pts)`}
                 isCurrentPlayer={false}
                 size="sm"
               />
@@ -263,7 +299,7 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
           <div className="rounded-lg bg-green-900/50 p-4">
             <PlayerHand
               cards={currentPlayer.hand}
-              label={`Your Hand (${currentPlayer.totalScore} pts)`}
+              label={`Your Hand (${calcRoundScore(currentPlayer.hand)} pts)`}
               isCurrentPlayer={true}
               onCardClick={handleCardClick}
               selectablePositions={selectablePositions}

@@ -25,7 +25,7 @@ export function ScoreBoard({ game }: ScoreBoardProps) {
         className="w-full p-4 text-left hover:bg-green-800/50 transition"
       >
         <div className="flex items-center justify-between">
-          <h3 className="text-xl font-bold text-white">Scores</h3>
+          <h3 className="text-xl font-bold text-white">Total Scores</h3>
           <div className="flex items-center gap-4">
             <div className="text-right">
               {game.players.map((player) => (
