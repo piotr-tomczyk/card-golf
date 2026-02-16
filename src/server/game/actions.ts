@@ -56,10 +56,11 @@ export function placeDrawnCard(
   const p = next.players.find((pl) => pl.id === player.id)!;
 
   const drawnCard = next.drawnCard!;
+  const oldCard = p.hand[position]!.card;
 
-  // Old hand card is removed from game
-  // Place drawn card face up
+  // Place drawn card face up, old card goes to discard pile
   p.hand[position] = { card: drawnCard, faceUp: true };
+  next.discardPile.push(oldCard);
   next.drawnCard = null;
 
   return advanceTurn(next, p);
@@ -108,8 +109,10 @@ export function takeDiscardAndReplace(
   const discardCard = next.discardPile.pop();
   if (!discardCard) throw new Error("Discard pile is empty");
 
-  // Replace hand card with discard card; old hand card is removed from game
+  // Replace hand card with discard card; old hand card goes to discard pile
+  const oldCard = p.hand[position]!.card;
   p.hand[position] = { card: discardCard, faceUp: true };
+  next.discardPile.push(oldCard);
 
   return advanceTurn(next, p);
 }
