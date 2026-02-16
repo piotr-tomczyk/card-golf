@@ -36,7 +36,7 @@ export function DrawnCardOverlay({
         </h2>
 
         {/* Card Display */}
-        <div className="flex justify-center">
+        <div className="flex justify-center py-6">
           <div className="scale-150">
             <Card card={card} faceUp={true} size="lg" />
           </div>

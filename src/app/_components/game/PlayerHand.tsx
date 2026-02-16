@@ -40,11 +40,12 @@ export function PlayerHand({
       </div>
 
       {/* Card Grid */}
+      <div className="flex justify-center">
       <div
-        className="grid gap-2 justify-center"
+        className="inline-grid gap-2"
         style={{
-          gridTemplateColumns: `repeat(${gridSize.cols}, minmax(0, 1fr))`,
-          gridTemplateRows: `repeat(${gridSize.rows}, minmax(0, 1fr))`,
+          gridTemplateColumns: `repeat(${gridSize.cols}, auto)`,
+          gridTemplateRows: `repeat(${gridSize.rows}, auto)`,
         }}
       >
         {cards.map((playerCard, index) => {
@@ -68,6 +69,7 @@ export function PlayerHand({
             />
           );
         })}
+      </div>
       </div>
     </div>
   );
