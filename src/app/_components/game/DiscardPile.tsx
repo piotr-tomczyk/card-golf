@@ -42,7 +42,9 @@ export function DiscardPile({
       />
       <div className="text-center">
         <p className="text-sm font-semibold text-white">Discard Pile</p>
-        <p className="text-xs text-green-300">Click to take</p>
+        <p className="text-xs text-green-300">
+          {selectable ? "Click to take" : "\u00A0"}
+        </p>
       </div>
     </div>
   );

@@ -55,12 +55,9 @@ export function placeDrawnCard(
   const next = cloneState(state);
   const p = next.players.find((pl) => pl.id === player.id)!;
 
-  const oldCard = p.hand[position]!;
   const drawnCard = next.drawnCard!;
 
-  // Put old card on discard pile
-  next.discardPile.push(oldCard.card);
-
+  // Old hand card is removed from game
   // Place drawn card face up
   p.hand[position] = { card: drawnCard, faceUp: true };
   next.drawnCard = null;
@@ -68,12 +65,15 @@ export function placeDrawnCard(
   return advanceTurn(next, p);
 }
 
-/** Discard the drawn card and flip a face-down card */
+/** Discard the drawn card. Ends the turn. */
 export function discardDrawnCard(state: GameState): GameState {
   const next = cloneState(state);
+  const currentPlayer = next.players.find(
+    (p) => p.playerIndex === next.currentPlayerIndex,
+  )!;
   next.discardPile.push(next.drawnCard!);
   next.drawnCard = null;
-  return next;
+  return advanceTurn(next, currentPlayer);
 }
 
 /**
@@ -108,8 +108,7 @@ export function takeDiscardAndReplace(
   const discardCard = next.discardPile.pop();
   if (!discardCard) throw new Error("Discard pile is empty");
 
-  const oldCard = p.hand[position]!;
-  next.discardPile.push(oldCard.card);
+  // Replace hand card with discard card; old hand card is removed from game
   p.hand[position] = { card: discardCard, faceUp: true };
 
   return advanceTurn(next, p);

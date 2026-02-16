@@ -21,6 +21,7 @@ interface PlayingPhaseProps {
 export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
   const [turnState, setTurnState] = useState<TurnState>("idle");
   const [isChoosingForDiscard, setIsChoosingForDiscard] = useState(false);
+  const [revealPosition, setRevealPosition] = useState<number | null>(null);
 
   const drawCard = api.game.drawCard.useMutation({
     onSuccess: () => {
@@ -46,7 +47,7 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
 
   const discardDrawnCard = api.game.discardDrawnCard.useMutation({
     onSuccess: () => {
-      setTurnState("after_discard");
+      setTurnState("idle");
       refetch();
     },
   });
@@ -86,6 +87,7 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
     if (!isYourTurn) {
       setTurnState("idle");
       setIsChoosingForDiscard(false);
+      setRevealPosition(null);
     }
   }, [isYourTurn, game.turnNumber]);
 
@@ -121,15 +123,6 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
   };
 
   const handleCardClick = (position: number) => {
-    // After discard - uncover a face-down card
-    if (turnState === "after_discard") {
-      const card = currentPlayer.hand[position];
-      if (card && !card.faceUp) {
-        uncoverCard.mutate({ gameId: game.id, position });
-      }
-      return;
-    }
-
     // Choosing replacement - place card
     if (turnState === "choosing_replacement") {
       if (isChoosingForDiscard) {
@@ -138,6 +131,15 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
       } else {
         // Placing drawn card
         placeDrawnCard.mutate({ gameId: game.id, position });
+      }
+      return;
+    }
+
+    // Idle - clicking a face-down card to reveal it (standalone action)
+    if (turnState === "idle" && isYourTurn) {
+      const card = currentPlayer.hand[position];
+      if (card && !card.faceUp) {
+        setRevealPosition(position);
       }
       return;
     }
@@ -179,7 +181,7 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
         )}
 
         {/* Center Area - Piles */}
-        <div className="flex items-center justify-center gap-8 rounded-lg bg-green-900/30 p-8">
+        <div className="flex items-end justify-center gap-8 rounded-lg bg-green-900/30 p-8">
           <DrawPile
             count={game.deckCount}
             selectable={isYourTurn && turnState === "idle" && game.deckCount > 0}
@@ -201,12 +203,12 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
             isCurrentPlayer={true}
             onCardClick={handleCardClick}
             selectablePositions={
-              turnState === "after_discard"
-                ? currentPlayer.hand
-                    .map((_, i) => i)
-                    .filter((i) => !currentPlayer.hand[i]?.faceUp)
-                : turnState === "choosing_replacement"
-                  ? currentPlayer.hand.map((_, i) => i)
+              turnState === "choosing_replacement"
+                ? currentPlayer.hand.map((_, i) => i)
+                : turnState === "idle" && isYourTurn
+                  ? currentPlayer.hand
+                      .map((_, i) => i)
+                      .filter((i) => !currentPlayer.hand[i]?.faceUp)
                   : []
             }
             size="md"
@@ -244,10 +246,43 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
         )}
       </div>
 
+      {/* Reveal Card Confirmation */}
+      {revealPosition !== null && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="mx-4 w-full max-w-sm rounded-xl bg-green-900 p-6 shadow-2xl border border-green-600">
+            <h3 className="text-xl font-bold text-white text-center">
+              Reveal this card?
+            </h3>
+            <p className="mt-2 text-sm text-green-300 text-center">
+              This will use your turn to flip this card face up.
+            </p>
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => setRevealPosition(null)}
+                className="flex-1 rounded-lg bg-green-800 px-4 py-3 font-semibold text-green-200 transition hover:bg-green-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  uncoverCard.mutate({ gameId: game.id, position: revealPosition });
+                  setRevealPosition(null);
+                }}
+                disabled={isPending}
+                className="flex-1 rounded-lg bg-green-500 px-4 py-3 font-semibold text-white transition hover:bg-green-400 disabled:opacity-50"
+              >
+                Reveal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Drawn Card Overlay */}
       {turnState === "holding_drawn_card" && game.drawnCard && (
         <DrawnCardOverlay
           card={game.drawnCard}
+          hand={currentPlayer.hand}
           onPlace={handlePlaceCard}
           onDiscard={handleDiscardCard}
           disabled={isPending}

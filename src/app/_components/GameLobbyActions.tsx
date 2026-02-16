@@ -14,9 +14,11 @@ export function GameLobbyActions({ session }: GameLobbyActionsProps) {
   const [joinCode, setJoinCode] = useState("");
   const [guestName, setGuestName] = useState("");
   const [showGuestInput, setShowGuestInput] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   // Load guest name from localStorage on mount
   useEffect(() => {
+    setIsHydrated(true);
     if (!session?.user) {
       const savedName = localStorage.getItem("guestName");
       if (savedName) {
@@ -113,7 +115,19 @@ export function GameLobbyActions({ session }: GameLobbyActionsProps) {
     }
   };
 
-  if (!session?.user && showGuestInput && !guestName) {
+  // Prevent hydration mismatch by showing a loading state until client-side hydration is complete
+  if (!isHydrated) {
+    return (
+      <div className="w-full max-w-md space-y-6">
+        <div className="rounded-lg bg-green-900/50 p-6 space-y-4">
+          <div className="h-8 bg-green-800/50 rounded animate-pulse" />
+          <div className="h-12 bg-green-800/50 rounded animate-pulse" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!session?.user && showGuestInput) {
     return (
       <div className="w-full max-w-md space-y-4">
         <div className="rounded-lg bg-green-900/50 p-6 space-y-4">

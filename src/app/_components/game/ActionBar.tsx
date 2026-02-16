@@ -1,9 +1,8 @@
 "use client";
 
 export type TurnState =
-  | "idle" // Start of turn, can draw or take from discard
+  | "idle" // Start of turn, can draw/take from discard/reveal a face-down card
   | "holding_drawn_card" // Drew from deck, need to place or discard
-  | "after_discard" // Discarded drawn card, need to flip a face-down card
   | "choosing_replacement"; // Took from discard, need to choose where to place
 
 interface ActionBarProps {
@@ -66,6 +65,12 @@ export function ActionBar({
             </div>
           )}
 
+          <div className="rounded-lg bg-green-700/50 px-6 py-3 text-center">
+            <p className="text-sm text-green-200">
+              Or click a face-down card to reveal it
+            </p>
+          </div>
+
           {deckEmpty && discardEmpty && (
             <div className="rounded-lg bg-red-900/50 border-2 border-red-600 px-6 py-3 text-center">
               <p className="text-red-200">
@@ -84,20 +89,6 @@ export function ActionBar({
       <div className="rounded-lg bg-green-900/50 p-4 text-center">
         <p className="text-lg text-green-300">
           Decide what to do with the drawn card...
-        </p>
-      </div>
-    );
-  }
-
-  // After discard - need to flip a face-down card
-  if (turnState === "after_discard") {
-    return (
-      <div className="rounded-lg bg-yellow-900/50 border-2 border-yellow-600 p-6 text-center">
-        <p className="text-xl font-bold text-yellow-200">
-          Choose a face-down card to flip
-        </p>
-        <p className="mt-2 text-sm text-yellow-300">
-          Click any face-down card in your hand
         </p>
       </div>
     );
