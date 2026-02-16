@@ -1,5 +1,6 @@
 "use client";
 
+import { useDroppable } from "@dnd-kit/core";
 import { Card } from "./Card";
 import type { PlayerCard, Card as CardType } from "@/server/game/types";
 
@@ -16,10 +17,27 @@ export interface PlayerHandProps {
   selectablePositions?: number[];
   /** Which positions are currently selected */
   selectedPositions?: number[];
+  /** Which positions are droppable (accept dragged cards) */
+  droppablePositions?: number[];
   /** Grid size (2x3 = 6 cards, 3x3 = 9 cards) */
   gridSize?: { rows: number; cols: number };
   /** Card size */
   size?: "sm" | "md" | "lg";
+}
+
+function DroppableCardSlot({
+  index,
+  children,
+}: {
+  index: number;
+  children: (isOver: boolean) => React.ReactNode;
+}) {
+  const { isOver, setNodeRef } = useDroppable({
+    id: `hand-position-${index}`,
+    data: { type: "hand-position", position: index },
+  });
+
+  return <div ref={setNodeRef}>{children(isOver)}</div>;
 }
 
 export function PlayerHand({
@@ -29,6 +47,7 @@ export function PlayerHand({
   onCardClick,
   selectablePositions = [],
   selectedPositions = [],
+  droppablePositions = [],
   gridSize = { rows: 2, cols: 3 },
   size = "md",
 }: PlayerHandProps) {
@@ -51,11 +70,30 @@ export function PlayerHand({
         {cards.map((playerCard, index) => {
           const isSelectable = selectablePositions.includes(index);
           const isSelected = selectedPositions.includes(index);
+          const isDroppable = droppablePositions.includes(index);
 
           // For opponent cards, only show if revealed
           const showCard = isCurrentPlayer
             ? playerCard.faceUp
             : playerCard.faceUp;
+
+          if (isDroppable) {
+            return (
+              <DroppableCardSlot key={index} index={index}>
+                {(isOver) => (
+                  <Card
+                    card={showCard ? playerCard.card : null}
+                    faceUp={showCard}
+                    selectable={isSelectable}
+                    selected={isSelected}
+                    isDropTarget={isOver}
+                    onClick={() => onCardClick?.(index)}
+                    size={size}
+                  />
+                )}
+              </DroppableCardSlot>
+            );
+          }
 
           return (
             <Card

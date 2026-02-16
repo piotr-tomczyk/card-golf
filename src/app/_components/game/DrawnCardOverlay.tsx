@@ -1,95 +1,82 @@
 "use client";
 
-import { useState } from "react";
+import { useDraggable, useDroppable } from "@dnd-kit/core";
+import { CSS } from "@dnd-kit/utilities";
 import { Card } from "./Card";
-import { PlayerHand } from "./PlayerHand";
-import type { Card as CardType, PlayerCard } from "@/server/game/types";
+import type { Card as CardType } from "@/server/game/types";
 
-interface DrawnCardOverlayProps {
-  /** The card that was drawn */
+interface DrawnCardInlineProps {
   card: CardType;
-  /** Current player's hand */
-  hand: (PlayerCard | { card: CardType | null; faceUp: boolean })[];
-  /** Callback when "Place in hand" is selected */
-  onPlace: () => void;
-  /** Callback when "Discard" is selected */
   onDiscard: () => void;
-  /** Whether actions are disabled (mutation pending) */
   disabled?: boolean;
 }
 
-export function DrawnCardOverlay({
-  card,
-  hand,
-  onPlace,
-  onDiscard,
-  disabled = false,
-}: DrawnCardOverlayProps) {
-  const [showHand, setShowHand] = useState(false);
+function DraggableCard({ card }: { card: CardType }) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } =
+    useDraggable({
+      id: "drawn-card",
+      data: { type: "drawn-card" },
+    });
+
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    opacity: isDragging ? 0.5 : 1,
+    touchAction: "none" as const,
+  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-      <div className="max-w-md space-y-6 rounded-2xl bg-green-900 p-8 shadow-2xl">
-        {/* Title */}
-        <h2 className="text-center text-3xl font-bold text-white">
-          You Drew
-        </h2>
+    <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
+      <Card card={card} faceUp={true} size="lg" className="cursor-grab active:cursor-grabbing" />
+    </div>
+  );
+}
 
-        {/* Card Display */}
-        <div className="flex justify-center py-6">
-          <div className="scale-150">
-            <Card card={card} faceUp={true} size="lg" />
-          </div>
-        </div>
+function DiscardDropZone({
+  onDiscard,
+  disabled,
+}: {
+  onDiscard: () => void;
+  disabled: boolean;
+}) {
+  const { isOver, setNodeRef } = useDroppable({
+    id: "discard-zone",
+    data: { type: "discard-zone" },
+  });
 
-        {/* Instructions */}
-        <p className="text-center text-green-200">
-          Choose what to do with this card
-        </p>
+  return (
+    <div ref={setNodeRef}>
+      <button
+        onClick={onDiscard}
+        disabled={disabled}
+        className={`
+          rounded-lg border-2 border-dashed px-6 py-3 font-semibold transition-all
+          ${
+            isOver
+              ? "border-red-400 bg-red-600/50 text-white scale-105"
+              : "border-red-500/50 bg-red-900/30 text-red-300 hover:bg-red-800/40 hover:border-red-400"
+          }
+          disabled:opacity-50 disabled:cursor-not-allowed
+        `}
+      >
+        Discard
+      </button>
+    </div>
+  );
+}
 
-        {/* View Hand Toggle */}
-        <button
-          onClick={() => setShowHand(!showHand)}
-          className="w-full rounded-lg bg-green-800 px-4 py-2 text-sm font-medium text-green-200 transition hover:bg-green-700"
-        >
-          {showHand ? "Hide your hand" : "View your hand"}
-        </button>
-
-        {showHand && (
-          <div className="rounded-lg bg-green-950/50 p-3">
-            <PlayerHand
-              cards={hand}
-              label="Your Hand"
-              isCurrentPlayer={false}
-              size="sm"
-            />
-          </div>
-        )}
-
-        {/* Action Buttons */}
-        <div className="space-y-3">
-          <button
-            onClick={onPlace}
-            disabled={disabled}
-            className="w-full rounded-lg bg-green-600 px-6 py-4 text-xl font-semibold text-white transition hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Place in Hand
-          </button>
-
-          <button
-            onClick={onDiscard}
-            disabled={disabled}
-            className="w-full rounded-lg bg-red-600 px-6 py-4 text-xl font-semibold text-white transition hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Discard
-          </button>
-        </div>
-
-        <p className="text-center text-xs text-green-400">
-          {disabled
-            ? "Processing..."
-            : "Placing replaces a card in your hand. Discarding ends your turn."}
-        </p>
+export function DrawnCardInline({
+  card,
+  onDiscard,
+  disabled = false,
+}: DrawnCardInlineProps) {
+  return (
+    <div className="rounded-lg bg-yellow-900/30 border-2 border-yellow-600/50 p-6">
+      <p className="text-center text-sm font-semibold text-yellow-200 mb-4">
+        You drew — drag to a hand position or discard
+      </p>
+      <div className="flex items-center justify-center gap-6">
+        <DraggableCard card={card} />
+        <DiscardDropZone onDiscard={onDiscard} disabled={disabled} />
       </div>
     </div>
   );

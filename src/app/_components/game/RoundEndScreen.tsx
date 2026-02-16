@@ -30,10 +30,12 @@ export function RoundEndScreen({ game, refetch }: RoundEndScreenProps) {
   };
 
   // Calculate who won this round
-  const roundWinner = currentRoundScores?.reduce(
+  const roundWinner = currentRoundScores?.reduce<
+    (typeof currentRoundScores)[number] | undefined
+  >(
     (lowest, current) =>
-      current.score < lowest.score ? current : lowest,
-    currentRoundScores[0]
+      !lowest || current.score < lowest.score ? current : lowest,
+    undefined,
   );
 
   const winnerPlayer = game.players.find((p) => p.id === roundWinner?.playerId);

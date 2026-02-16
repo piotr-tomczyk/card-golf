@@ -13,6 +13,8 @@ export interface CardProps {
   selectable?: boolean;
   /** Whether the card is currently selected */
   selected?: boolean;
+  /** Whether a drag is hovering over this card (drop target) */
+  isDropTarget?: boolean;
   /** Size variant */
   size?: "sm" | "md" | "lg";
   /** Additional CSS classes */
@@ -25,6 +27,7 @@ export function Card({
   onClick,
   selectable = false,
   selected = false,
+  isDropTarget = false,
   size = "md",
   className = "",
 }: CardProps) {
@@ -48,11 +51,16 @@ export function Card({
         duration-200
         ${selectable ? "cursor-pointer hover:scale-105 hover:shadow-lg" : "cursor-default"}
         ${selected ? "ring-4 ring-yellow-400 scale-105 shadow-lg" : ""}
+        ${isDropTarget ? "ring-4 ring-blue-400 scale-110 shadow-lg shadow-blue-500/50" : ""}
         ${!faceUp && selectable ? "hover:brightness-110" : ""}
         ${className}
       `}
       style={{
-        filter: selected ? "drop-shadow(0 0 8px rgba(251, 191, 36, 0.8))" : undefined,
+        filter: selected
+          ? "drop-shadow(0 0 8px rgba(251, 191, 36, 0.8))"
+          : isDropTarget
+            ? "drop-shadow(0 0 12px rgba(96, 165, 250, 0.8))"
+            : undefined,
       }}
     >
       <div className="relative w-full h-full">

@@ -83,12 +83,12 @@ export function ActionBar({
     );
   }
 
-  // Holding drawn card - will be shown via overlay, so minimal UI here
+  // Holding drawn card - shown inline above hand
   if (turnState === "holding_drawn_card") {
     return (
-      <div className="rounded-lg bg-green-900/50 p-4 text-center">
-        <p className="text-lg text-green-300">
-          Decide what to do with the drawn card...
+      <div className="rounded-lg bg-yellow-900/30 border border-yellow-600/50 p-4 text-center">
+        <p className="text-lg text-yellow-200">
+          Drag the card onto a hand position to replace it, or click a hand position
         </p>
       </div>
     );

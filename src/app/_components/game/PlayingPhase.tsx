@@ -1,10 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import {
+  DndContext,
+  type DragEndEvent,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
 import { PlayerHand } from "./PlayerHand";
 import { DrawPile } from "./DrawPile";
 import { DiscardPile } from "./DiscardPile";
-import { DrawnCardOverlay } from "./DrawnCardOverlay";
+import { DrawnCardInline } from "./DrawnCardOverlay";
 import { TurnIndicator } from "./TurnIndicator";
 import { ActionBar, type TurnState } from "./ActionBar";
 import { ScoreBoard } from "./ScoreBoard";
@@ -22,6 +30,15 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
   const [turnState, setTurnState] = useState<TurnState>("idle");
   const [isChoosingForDiscard, setIsChoosingForDiscard] = useState(false);
   const [revealPosition, setRevealPosition] = useState<number | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 200, tolerance: 5 },
+    }),
+  );
 
   const drawCard = api.game.drawCard.useMutation({
     onSuccess: () => {
@@ -114,15 +131,17 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
     }
   };
 
-  const handlePlaceCard = () => {
-    setTurnState("choosing_replacement");
-  };
-
   const handleDiscardCard = () => {
     discardDrawnCard.mutate({ gameId: game.id });
   };
 
   const handleCardClick = (position: number) => {
+    // Holding drawn card — clicking a hand position places the card
+    if (turnState === "holding_drawn_card") {
+      placeDrawnCard.mutate({ gameId: game.id, position });
+      return;
+    }
+
     // Choosing replacement - place card
     if (turnState === "choosing_replacement") {
       if (isChoosingForDiscard) {
@@ -145,6 +164,24 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
     }
   };
 
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { over } = event;
+    if (!over || isPending) return;
+
+    const overData = over.data.current;
+
+    if (overData?.type === "hand-position") {
+      const position = overData.position as number;
+      if (turnState === "holding_drawn_card") {
+        placeDrawnCard.mutate({ gameId: game.id, position });
+      }
+    } else if (overData?.type === "discard-zone") {
+      if (turnState === "holding_drawn_card") {
+        discardDrawnCard.mutate({ gameId: game.id });
+      }
+    }
+  };
+
   const topDiscard = game.discardTop ?? null;
 
   const totalRounds = game.config.totalRounds;
@@ -155,139 +192,149 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
     discardDrawnCard.isPending ||
     uncoverCard.isPending;
 
-  return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-b from-green-800 to-green-950 px-4 py-8 text-white">
-      <div className="mx-auto w-full max-w-6xl space-y-6">
-        {/* Turn Indicator */}
-        <TurnIndicator
-          currentPlayerName={currentTurnPlayer.displayName}
-          isYourTurn={isYourTurn}
-          turnNumber={game.turnNumber}
-          currentRound={game.currentRound}
-          totalRounds={totalRounds}
-          isFinalTurn={game.status === "final_turn"}
-        />
+  // Hand positions are droppable when holding a drawn card or choosing replacement
+  const droppablePositions =
+    turnState === "holding_drawn_card" || turnState === "choosing_replacement"
+      ? currentPlayer.hand.map((_, i) => i)
+      : [];
 
-        {/* Opponent Hand */}
-        {opponent && (
-          <div className="rounded-lg bg-green-900/30 p-4">
-            <PlayerHand
-              cards={opponent.hand}
-              label={`${opponent.displayName} (${opponent.totalScore} pts)`}
-              isCurrentPlayer={false}
-              size="sm"
+  // Hand positions are selectable when holding drawn card, choosing replacement,
+  // or idle (for face-down card reveal)
+  const selectablePositions =
+    turnState === "holding_drawn_card" || turnState === "choosing_replacement"
+      ? currentPlayer.hand.map((_, i) => i)
+      : turnState === "idle" && isYourTurn
+        ? currentPlayer.hand
+            .map((_, i) => i)
+            .filter((i) => !currentPlayer.hand[i]?.faceUp)
+        : [];
+
+  return (
+    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+      <div className="flex min-h-screen flex-col bg-gradient-to-b from-green-800 to-green-950 px-4 py-8 text-white">
+        <div className="mx-auto w-full max-w-6xl space-y-6">
+          {/* Turn Indicator */}
+          <TurnIndicator
+            currentPlayerName={currentTurnPlayer.displayName}
+            isYourTurn={isYourTurn}
+            turnNumber={game.turnNumber}
+            currentRound={game.currentRound}
+            totalRounds={totalRounds}
+            isFinalTurn={game.status === "final_turn"}
+          />
+
+          {/* Opponent Hand */}
+          {opponent && (
+            <div className="rounded-lg bg-green-900/30 p-4">
+              <PlayerHand
+                cards={opponent.hand}
+                label={`${opponent.displayName} (${opponent.totalScore} pts)`}
+                isCurrentPlayer={false}
+                size="sm"
+              />
+            </div>
+          )}
+
+          {/* Center Area - Piles */}
+          <div className="flex items-end justify-center gap-8 rounded-lg bg-green-900/30 p-8">
+            <DrawPile
+              count={game.deckCount}
+              selectable={isYourTurn && turnState === "idle" && game.deckCount > 0}
+              onClick={handleDrawFromDeck}
+            />
+
+            <DiscardPile
+              topCard={topDiscard}
+              selectable={isYourTurn && turnState === "idle" && topDiscard !== null}
+              onClick={handleTakeFromDiscard}
             />
           </div>
-        )}
 
-        {/* Center Area - Piles */}
-        <div className="flex items-end justify-center gap-8 rounded-lg bg-green-900/30 p-8">
-          <DrawPile
-            count={game.deckCount}
-            selectable={isYourTurn && turnState === "idle" && game.deckCount > 0}
-            onClick={handleDrawFromDeck}
+          {/* Drawn Card Inline */}
+          {turnState === "holding_drawn_card" && game.drawnCard && (
+            <DrawnCardInline
+              card={game.drawnCard}
+              onDiscard={handleDiscardCard}
+              disabled={isPending}
+            />
+          )}
+
+          {/* Current Player Hand */}
+          <div className="rounded-lg bg-green-900/50 p-4">
+            <PlayerHand
+              cards={currentPlayer.hand}
+              label={`Your Hand (${currentPlayer.totalScore} pts)`}
+              isCurrentPlayer={true}
+              onCardClick={handleCardClick}
+              selectablePositions={selectablePositions}
+              droppablePositions={droppablePositions}
+              size="md"
+            />
+          </div>
+
+          {/* Action Bar */}
+          <ActionBar
+            turnState={turnState}
+            isYourTurn={isYourTurn}
+            deckEmpty={game.deckCount === 0}
+            discardEmpty={!topDiscard}
+            onDrawFromDeck={handleDrawFromDeck}
+            isPending={isPending}
           />
 
-          <DiscardPile
-            topCard={topDiscard}
-            selectable={isYourTurn && turnState === "idle" && topDiscard !== null}
-            onClick={handleTakeFromDiscard}
-          />
+          {/* ScoreBoard */}
+          <ScoreBoard game={game} />
+
+          {/* Error Display */}
+          {(drawCard.error ||
+            takeDiscardAndReplace.error ||
+            placeDrawnCard.error ||
+            discardDrawnCard.error ||
+            uncoverCard.error) && (
+            <div className="rounded-lg bg-red-900/50 border-2 border-red-600 p-4 text-center">
+              <p className="text-red-200">
+                {drawCard.error?.message ||
+                  takeDiscardAndReplace.error?.message ||
+                  placeDrawnCard.error?.message ||
+                  discardDrawnCard.error?.message ||
+                  uncoverCard.error?.message}
+              </p>
+            </div>
+          )}
         </div>
 
-        {/* Current Player Hand */}
-        <div className="rounded-lg bg-green-900/50 p-4">
-          <PlayerHand
-            cards={currentPlayer.hand}
-            label={`Your Hand (${currentPlayer.totalScore} pts)`}
-            isCurrentPlayer={true}
-            onCardClick={handleCardClick}
-            selectablePositions={
-              turnState === "choosing_replacement"
-                ? currentPlayer.hand.map((_, i) => i)
-                : turnState === "idle" && isYourTurn
-                  ? currentPlayer.hand
-                      .map((_, i) => i)
-                      .filter((i) => !currentPlayer.hand[i]?.faceUp)
-                  : []
-            }
-            size="md"
-          />
-        </div>
-
-        {/* Action Bar */}
-        <ActionBar
-          turnState={turnState}
-          isYourTurn={isYourTurn}
-          deckEmpty={game.deckCount === 0}
-          discardEmpty={!topDiscard}
-          onDrawFromDeck={handleDrawFromDeck}
-          isPending={isPending}
-        />
-
-        {/* ScoreBoard */}
-        <ScoreBoard game={game} />
-
-        {/* Error Display */}
-        {(drawCard.error ||
-          takeDiscardAndReplace.error ||
-          placeDrawnCard.error ||
-          discardDrawnCard.error ||
-          uncoverCard.error) && (
-          <div className="rounded-lg bg-red-900/50 border-2 border-red-600 p-4 text-center">
-            <p className="text-red-200">
-              {drawCard.error?.message ||
-                takeDiscardAndReplace.error?.message ||
-                placeDrawnCard.error?.message ||
-                discardDrawnCard.error?.message ||
-                uncoverCard.error?.message}
-            </p>
+        {/* Reveal Card Confirmation */}
+        {revealPosition !== null && (
+          <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+            <div className="mx-4 w-full max-w-sm rounded-xl bg-green-900 p-6 shadow-2xl border border-green-600">
+              <h3 className="text-xl font-bold text-white text-center">
+                Reveal this card?
+              </h3>
+              <p className="mt-2 text-sm text-green-300 text-center">
+                This will use your turn to flip this card face up.
+              </p>
+              <div className="mt-6 flex gap-3">
+                <button
+                  onClick={() => setRevealPosition(null)}
+                  className="flex-1 rounded-lg bg-green-800 px-4 py-3 font-semibold text-green-200 transition hover:bg-green-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    uncoverCard.mutate({ gameId: game.id, position: revealPosition });
+                    setRevealPosition(null);
+                  }}
+                  disabled={isPending}
+                  className="flex-1 rounded-lg bg-green-500 px-4 py-3 font-semibold text-white transition hover:bg-green-400 disabled:opacity-50"
+                >
+                  Reveal
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
-
-      {/* Reveal Card Confirmation */}
-      {revealPosition !== null && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="mx-4 w-full max-w-sm rounded-xl bg-green-900 p-6 shadow-2xl border border-green-600">
-            <h3 className="text-xl font-bold text-white text-center">
-              Reveal this card?
-            </h3>
-            <p className="mt-2 text-sm text-green-300 text-center">
-              This will use your turn to flip this card face up.
-            </p>
-            <div className="mt-6 flex gap-3">
-              <button
-                onClick={() => setRevealPosition(null)}
-                className="flex-1 rounded-lg bg-green-800 px-4 py-3 font-semibold text-green-200 transition hover:bg-green-700"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  uncoverCard.mutate({ gameId: game.id, position: revealPosition });
-                  setRevealPosition(null);
-                }}
-                disabled={isPending}
-                className="flex-1 rounded-lg bg-green-500 px-4 py-3 font-semibold text-white transition hover:bg-green-400 disabled:opacity-50"
-              >
-                Reveal
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Drawn Card Overlay */}
-      {turnState === "holding_drawn_card" && game.drawnCard && (
-        <DrawnCardOverlay
-          card={game.drawnCard}
-          hand={currentPlayer.hand}
-          onPlace={handlePlaceCard}
-          onDiscard={handleDiscardCard}
-          disabled={isPending}
-        />
-      )}
-    </div>
+    </DndContext>
   );
 }
