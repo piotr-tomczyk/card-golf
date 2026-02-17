@@ -10,13 +10,14 @@ interface DrawPileProps {
   /** Callback when pile is clicked */
   onClick?: () => void;
   /** Card size variant */
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
 }
 
 const stackSizes = {
   sm: "w-16 h-24",
   md: "w-20 h-28",
   lg: "w-24 h-36",
+  xl: "w-32 h-48",
 };
 
 export function DrawPile({ count, selectable, onClick, size = "lg" }: DrawPileProps) {

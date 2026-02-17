@@ -27,7 +27,20 @@ interface PlayingPhaseProps {
   userId?: string;
 }
 
+function useIsDesktop() {
+  const [isDesktop, setIsDesktop] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    setIsDesktop(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return isDesktop;
+}
+
 export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
+  const isDesktop = useIsDesktop();
   const [turnState, setTurnState] = useState<TurnState>("idle");
   const [isChoosingForDiscard, setIsChoosingForDiscard] = useState(false);
   const [revealPosition, setRevealPosition] = useState<number | null>(null);
@@ -254,8 +267,7 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
 
   return (
     <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-      <div className="flex min-h-screen flex-col bg-gradient-to-b from-green-800 to-green-950 px-2 py-2 text-white md:px-6 md:py-4">
-        <div className="mx-auto w-full space-y-3">
+      <div className="flex min-h-screen flex-col bg-gradient-to-b from-green-800 to-green-950 px-2 py-2 text-white md:px-4 md:py-3 md:h-screen md:overflow-hidden">
           {/* Turn Indicator - sticky at top */}
           <TurnIndicator
             currentPlayerName={currentTurnPlayer.displayName}
@@ -266,51 +278,35 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
             isFinalTurn={game.status === "final_turn"}
           />
 
-          {/* Main game area: side-by-side on desktop, stacked on mobile */}
-          <div className="md:grid md:grid-cols-[1fr_1fr] md:gap-6 md:flex-1">
-            {/* Left column: hands */}
-            <div className="flex flex-col justify-center space-y-4">
-              {/* Opponent Hand */}
-              {opponent && (
-                <div className="rounded-lg bg-green-900/30 p-3 md:p-4">
-                  <PlayerHand
-                    cards={opponent.hand}
-                    label={`${opponent.displayName} (${calcRoundScore(opponent.hand)} pts)`}
-                    isCurrentPlayer={false}
-                    size="md"
-                  />
-                </div>
-              )}
-
-              {/* Current Player Hand */}
-              <div className="rounded-lg bg-green-900/50 p-3 md:p-4">
+          {/* Main game area — 3 columns on desktop: opponent | piles+actions | your hand */}
+          <div className="flex-1 flex flex-col md:flex-row md:items-center md:justify-center gap-2 md:gap-8 mt-2 md:mt-3 min-h-0">
+            {/* Opponent Hand */}
+            {opponent && (
+              <div className="rounded-lg bg-green-900/30 p-3 md:p-4 shrink-0">
                 <PlayerHand
-                  cards={currentPlayer.hand}
-                  label={`Your Hand (${calcRoundScore(currentPlayer.hand)} pts)`}
-                  isCurrentPlayer={true}
-                  onCardClick={handleCardClick}
-                  selectablePositions={selectablePositions}
-                  droppablePositions={droppablePositions}
-                  size="lg"
+                  cards={opponent.hand}
+                  label={`${opponent.displayName} (${calcRoundScore(opponent.hand)} pts)`}
+                  isCurrentPlayer={false}
+                  size={isDesktop ? "lg" : "sm"}
                 />
               </div>
-            </div>
+            )}
 
-            {/* Right column: piles + drawn card + actions */}
-            <div className="mt-3 md:mt-0 flex flex-col justify-center space-y-3">
+            {/* Center: piles + drawn card + actions */}
+            <div className="flex flex-col items-center gap-3 shrink-0">
               {/* Piles */}
-              <div className="flex items-start justify-center gap-6 rounded-lg bg-green-900/30 p-4 md:p-6">
+              <div className="flex items-start justify-center gap-6 rounded-lg bg-green-900/30 p-3 md:p-4">
                 <DrawPile
                   count={game.deckCount}
                   selectable={isYourTurn && turnState === "idle" && game.deckCount > 0}
                   onClick={handleDrawFromDeck}
-                  size="lg"
+                  size={isDesktop ? "xl" : "lg"}
                 />
                 <DiscardPile
                   topCard={topDiscard}
                   selectable={isYourTurn && turnState === "idle" && topDiscard !== null}
                   onClick={handleTakeFromDiscard}
-                  size="lg"
+                  size={isDesktop ? "xl" : "lg"}
                 />
               </div>
 
@@ -325,15 +321,13 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
 
               {/* Cancel button for discard pile selection */}
               {turnState === "choosing_replacement" && isChoosingForDiscard && (
-                <div className="flex justify-center">
-                  <button
-                    onClick={handleCancel}
-                    disabled={isPending}
-                    className="rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Cancel
-                  </button>
-                </div>
+                <button
+                  onClick={handleCancel}
+                  disabled={isPending}
+                  className="rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Cancel
+                </button>
               )}
 
               {/* Action Bar */}
@@ -346,28 +340,42 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
                 isPending={isPending}
               />
             </div>
+
+            {/* Current Player Hand */}
+            <div className="rounded-lg bg-green-900/50 p-3 md:p-4 shrink-0">
+              <PlayerHand
+                cards={currentPlayer.hand}
+                label={`Your Hand (${calcRoundScore(currentPlayer.hand)} pts)`}
+                isCurrentPlayer={true}
+                onCardClick={handleCardClick}
+                selectablePositions={selectablePositions}
+                droppablePositions={droppablePositions}
+                size={isDesktop ? "xl" : "md"}
+              />
+            </div>
           </div>
 
-          {/* ScoreBoard */}
-          <ScoreBoard game={game} />
+          {/* Bottom bar: scores + errors */}
+          <div className="mt-auto pt-2 space-y-2">
+            <ScoreBoard game={game} />
 
-          {/* Error Display */}
-          {(drawCard.error ||
-            takeDiscardAndReplace.error ||
-            placeDrawnCard.error ||
-            discardDrawnCard.error ||
-            uncoverCard.error) && (
-            <div className="rounded-lg bg-red-900/50 border-2 border-red-600 p-3 text-center">
-              <p className="text-sm text-red-200">
-                {drawCard.error?.message ||
-                  takeDiscardAndReplace.error?.message ||
-                  placeDrawnCard.error?.message ||
-                  discardDrawnCard.error?.message ||
-                  uncoverCard.error?.message}
-              </p>
-            </div>
-          )}
-        </div>
+            {/* Error Display */}
+            {(drawCard.error ||
+              takeDiscardAndReplace.error ||
+              placeDrawnCard.error ||
+              discardDrawnCard.error ||
+              uncoverCard.error) && (
+              <div className="rounded-lg bg-red-900/50 border-2 border-red-600 p-3 text-center">
+                <p className="text-sm text-red-200">
+                  {drawCard.error?.message ||
+                    takeDiscardAndReplace.error?.message ||
+                    placeDrawnCard.error?.message ||
+                    discardDrawnCard.error?.message ||
+                    uncoverCard.error?.message}
+                </p>
+              </div>
+            )}
+          </div>
 
         {/* Reveal Card Confirmation */}
         {revealPosition !== null && (

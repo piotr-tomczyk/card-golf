@@ -13,13 +13,14 @@ interface DiscardPileProps {
   /** Callback when pile is clicked */
   onClick?: () => void;
   /** Card size variant */
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
 }
 
 const emptySizes = {
   sm: "h-24 w-16",
   md: "h-28 w-20",
   lg: "h-36 w-24",
+  xl: "h-48 w-32",
 };
 
 function DraggableDiscardCard({
@@ -29,7 +30,7 @@ function DraggableDiscardCard({
 }: {
   card: CardType;
   onClick?: () => void;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({

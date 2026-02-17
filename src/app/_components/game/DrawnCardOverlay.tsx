@@ -26,7 +26,7 @@ function DraggableCard({ card }: { card: CardType }) {
 
   return (
     <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
-      <Card card={card} faceUp={true} size="lg" className="cursor-grab active:cursor-grabbing" />
+      <Card card={card} faceUp={true} size="xl" className="cursor-grab active:cursor-grabbing" />
     </div>
   );
 }

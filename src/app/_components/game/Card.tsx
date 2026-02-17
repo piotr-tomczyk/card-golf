@@ -16,7 +16,7 @@ export interface CardProps {
   /** Whether a drag is hovering over this card (drop target) */
   isDropTarget?: boolean;
   /** Size variant */
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
   /** Additional CSS classes */
   className?: string;
 }
@@ -35,6 +35,7 @@ export function Card({
     sm: "w-16 h-24",
     md: "w-20 h-28",
     lg: "w-24 h-36",
+    xl: "w-32 h-48",
   };
 
   const cardImage = faceUp && card ? `/cards/${card}.svg` : "/cards/back.svg";

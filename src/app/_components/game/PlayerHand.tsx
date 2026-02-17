@@ -22,7 +22,7 @@ export interface PlayerHandProps {
   /** Grid size (2x3 = 6 cards, 3x3 = 9 cards) */
   gridSize?: { rows: number; cols: number };
   /** Card size */
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
 }
 
 function DroppableCardSlot({
