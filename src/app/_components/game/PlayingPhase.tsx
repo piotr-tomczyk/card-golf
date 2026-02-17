@@ -134,6 +134,30 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
 
   const opponent = game.players.find((p) => p.id !== currentPlayer.id);
 
+  // Find positions that form a matching column (same rank, all face-up)
+  const getMatchedPositions = (hand: { card: string | null; faceUp: boolean }[]) => {
+    const cols = game.config.gridCols;
+    const rows = hand.length / cols;
+    const matched: number[] = [];
+
+    for (let col = 0; col < cols; col++) {
+      const positions: number[] = [];
+      const ranks: string[] = [];
+      for (let row = 0; row < rows; row++) {
+        const idx = row * cols + col;
+        const slot = hand[idx];
+        if (slot?.faceUp && slot.card) {
+          positions.push(idx);
+          ranks.push(getRank(slot.card as Parameters<typeof getRank>[0]));
+        }
+      }
+      if (positions.length > 1 && ranks.every((r) => r === ranks[0])) {
+        matched.push(...positions);
+      }
+    }
+    return matched;
+  };
+
   // Calculate live round score from face-up cards only
   const calcRoundScore = (hand: { card: string | null; faceUp: boolean }[]) => {
     const cols = game.config.gridCols;
@@ -287,6 +311,7 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
                   cards={opponent.hand}
                   label={`${opponent.displayName} (${calcRoundScore(opponent.hand)} pts)`}
                   isCurrentPlayer={false}
+                  matchedPositions={getMatchedPositions(opponent.hand)}
                   size={isDesktop ? "lg" : "sm"}
                 />
               </div>
@@ -294,21 +319,23 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
 
             {/* Center: piles + drawn card + actions */}
             <div className="flex flex-col items-center gap-3 shrink-0">
-              {/* Piles */}
-              <div className="flex items-start justify-center gap-6 rounded-lg bg-green-900/30 p-3 md:p-4">
-                <DrawPile
-                  count={game.deckCount}
-                  selectable={isYourTurn && turnState === "idle" && game.deckCount > 0}
-                  onClick={handleDrawFromDeck}
-                  size={isDesktop ? "xl" : "lg"}
-                />
-                <DiscardPile
-                  topCard={topDiscard}
-                  selectable={isYourTurn && turnState === "idle" && topDiscard !== null}
-                  onClick={handleTakeFromDiscard}
-                  size={isDesktop ? "xl" : "lg"}
-                />
-              </div>
+              {/* Piles - hidden when holding drawn card or choosing replacement */}
+              {turnState === "idle" && (
+                <div className="flex items-start justify-center gap-6 rounded-lg bg-green-900/30 p-3 md:p-4">
+                  <DrawPile
+                    count={game.deckCount}
+                    selectable={isYourTurn && game.deckCount > 0}
+                    onClick={handleDrawFromDeck}
+                    size={isDesktop ? "xl" : "lg"}
+                  />
+                  <DiscardPile
+                    topCard={topDiscard}
+                    selectable={isYourTurn && topDiscard !== null}
+                    onClick={handleTakeFromDiscard}
+                    size={isDesktop ? "xl" : "lg"}
+                  />
+                </div>
+              )}
 
               {/* Drawn Card Inline */}
               {turnState === "holding_drawn_card" && game.drawnCard && (
@@ -334,15 +361,15 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
               <ActionBar
                 turnState={turnState}
                 isYourTurn={isYourTurn}
-                deckEmpty={game.deckCount === 0}
-                discardEmpty={!topDiscard}
-                onDrawFromDeck={handleDrawFromDeck}
-                isPending={isPending}
               />
             </div>
 
             {/* Current Player Hand */}
-            <div className="rounded-lg bg-green-900/50 p-3 md:p-4 shrink-0">
+            <div className={`rounded-lg p-3 md:p-4 shrink-0 transition-all duration-500 ${
+              isYourTurn
+                ? "bg-green-800/60 ring-2 ring-green-400/70 your-turn-glow"
+                : "bg-green-900/50"
+            }`}>
               <PlayerHand
                 cards={currentPlayer.hand}
                 label={`Your Hand (${calcRoundScore(currentPlayer.hand)} pts)`}
@@ -350,6 +377,7 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
                 onCardClick={handleCardClick}
                 selectablePositions={selectablePositions}
                 droppablePositions={droppablePositions}
+                matchedPositions={getMatchedPositions(currentPlayer.hand)}
                 size={isDesktop ? "xl" : "md"}
               />
             </div>
