@@ -165,6 +165,13 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
     discardDrawnCard.mutate({ gameId: game.id });
   };
 
+  const handleCancel = () => {
+    if (turnState === "choosing_replacement" && isChoosingForDiscard) {
+      setIsChoosingForDiscard(false);
+      setTurnState("idle");
+    }
+  };
+
   const handleCardClick = (position: number) => {
     // Holding drawn card — clicking a hand position places the card
     if (turnState === "holding_drawn_card") {
@@ -293,6 +300,19 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
               onDiscard={handleDiscardCard}
               disabled={isPending}
             />
+          )}
+
+          {/* Cancel button for discard pile selection */}
+          {turnState === "choosing_replacement" && isChoosingForDiscard && (
+            <div className="flex justify-center">
+              <button
+                onClick={handleCancel}
+                disabled={isPending}
+                className="rounded-lg bg-red-700 px-5 py-3 font-semibold text-white transition hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+            </div>
           )}
 
           {/* Current Player Hand */}
