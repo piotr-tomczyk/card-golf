@@ -254,9 +254,9 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
 
   return (
     <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-      <div className="flex min-h-screen flex-col bg-gradient-to-b from-green-800 to-green-950 px-4 py-8 text-white">
-        <div className="mx-auto w-full max-w-6xl space-y-6">
-          {/* Turn Indicator */}
+      <div className="flex min-h-screen flex-col bg-gradient-to-b from-green-800 to-green-950 px-2 py-2 text-white md:px-6 md:py-4">
+        <div className="mx-auto w-full space-y-3">
+          {/* Turn Indicator - sticky at top */}
           <TurnIndicator
             currentPlayerName={currentTurnPlayer.displayName}
             isYourTurn={isYourTurn}
@@ -266,77 +266,87 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
             isFinalTurn={game.status === "final_turn"}
           />
 
-          {/* Opponent Hand */}
-          {opponent && (
-            <div className="rounded-lg bg-green-900/30 p-4">
-              <PlayerHand
-                cards={opponent.hand}
-                label={`${opponent.displayName} (${calcRoundScore(opponent.hand)} pts)`}
-                isCurrentPlayer={false}
-                size="sm"
+          {/* Main game area: side-by-side on desktop, stacked on mobile */}
+          <div className="md:grid md:grid-cols-[1fr_1fr] md:gap-6 md:flex-1">
+            {/* Left column: hands */}
+            <div className="flex flex-col justify-center space-y-4">
+              {/* Opponent Hand */}
+              {opponent && (
+                <div className="rounded-lg bg-green-900/30 p-3 md:p-4">
+                  <PlayerHand
+                    cards={opponent.hand}
+                    label={`${opponent.displayName} (${calcRoundScore(opponent.hand)} pts)`}
+                    isCurrentPlayer={false}
+                    size="md"
+                  />
+                </div>
+              )}
+
+              {/* Current Player Hand */}
+              <div className="rounded-lg bg-green-900/50 p-3 md:p-4">
+                <PlayerHand
+                  cards={currentPlayer.hand}
+                  label={`Your Hand (${calcRoundScore(currentPlayer.hand)} pts)`}
+                  isCurrentPlayer={true}
+                  onCardClick={handleCardClick}
+                  selectablePositions={selectablePositions}
+                  droppablePositions={droppablePositions}
+                  size="lg"
+                />
+              </div>
+            </div>
+
+            {/* Right column: piles + drawn card + actions */}
+            <div className="mt-3 md:mt-0 flex flex-col justify-center space-y-3">
+              {/* Piles */}
+              <div className="flex items-start justify-center gap-6 rounded-lg bg-green-900/30 p-4 md:p-6">
+                <DrawPile
+                  count={game.deckCount}
+                  selectable={isYourTurn && turnState === "idle" && game.deckCount > 0}
+                  onClick={handleDrawFromDeck}
+                  size="lg"
+                />
+                <DiscardPile
+                  topCard={topDiscard}
+                  selectable={isYourTurn && turnState === "idle" && topDiscard !== null}
+                  onClick={handleTakeFromDiscard}
+                  size="lg"
+                />
+              </div>
+
+              {/* Drawn Card Inline */}
+              {turnState === "holding_drawn_card" && game.drawnCard && (
+                <DrawnCardInline
+                  card={game.drawnCard}
+                  onDiscard={handleDiscardCard}
+                  disabled={isPending}
+                />
+              )}
+
+              {/* Cancel button for discard pile selection */}
+              {turnState === "choosing_replacement" && isChoosingForDiscard && (
+                <div className="flex justify-center">
+                  <button
+                    onClick={handleCancel}
+                    disabled={isPending}
+                    className="rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+
+              {/* Action Bar */}
+              <ActionBar
+                turnState={turnState}
+                isYourTurn={isYourTurn}
+                deckEmpty={game.deckCount === 0}
+                discardEmpty={!topDiscard}
+                onDrawFromDeck={handleDrawFromDeck}
+                isPending={isPending}
               />
             </div>
-          )}
-
-          {/* Center Area - Piles */}
-          <div className="flex items-end justify-center gap-8 rounded-lg bg-green-900/30 p-8">
-            <DrawPile
-              count={game.deckCount}
-              selectable={isYourTurn && turnState === "idle" && game.deckCount > 0}
-              onClick={handleDrawFromDeck}
-            />
-
-            <DiscardPile
-              topCard={topDiscard}
-              selectable={isYourTurn && turnState === "idle" && topDiscard !== null}
-              onClick={handleTakeFromDiscard}
-            />
           </div>
-
-          {/* Drawn Card Inline */}
-          {turnState === "holding_drawn_card" && game.drawnCard && (
-            <DrawnCardInline
-              card={game.drawnCard}
-              onDiscard={handleDiscardCard}
-              disabled={isPending}
-            />
-          )}
-
-          {/* Cancel button for discard pile selection */}
-          {turnState === "choosing_replacement" && isChoosingForDiscard && (
-            <div className="flex justify-center">
-              <button
-                onClick={handleCancel}
-                disabled={isPending}
-                className="rounded-lg bg-red-700 px-5 py-3 font-semibold text-white transition hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Cancel
-              </button>
-            </div>
-          )}
-
-          {/* Current Player Hand */}
-          <div className="rounded-lg bg-green-900/50 p-4">
-            <PlayerHand
-              cards={currentPlayer.hand}
-              label={`Your Hand (${calcRoundScore(currentPlayer.hand)} pts)`}
-              isCurrentPlayer={true}
-              onCardClick={handleCardClick}
-              selectablePositions={selectablePositions}
-              droppablePositions={droppablePositions}
-              size="md"
-            />
-          </div>
-
-          {/* Action Bar */}
-          <ActionBar
-            turnState={turnState}
-            isYourTurn={isYourTurn}
-            deckEmpty={game.deckCount === 0}
-            discardEmpty={!topDiscard}
-            onDrawFromDeck={handleDrawFromDeck}
-            isPending={isPending}
-          />
 
           {/* ScoreBoard */}
           <ScoreBoard game={game} />
@@ -347,8 +357,8 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
             placeDrawnCard.error ||
             discardDrawnCard.error ||
             uncoverCard.error) && (
-            <div className="rounded-lg bg-red-900/50 border-2 border-red-600 p-4 text-center">
-              <p className="text-red-200">
+            <div className="rounded-lg bg-red-900/50 border-2 border-red-600 p-3 text-center">
+              <p className="text-sm text-red-200">
                 {drawCard.error?.message ||
                   takeDiscardAndReplace.error?.message ||
                   placeDrawnCard.error?.message ||

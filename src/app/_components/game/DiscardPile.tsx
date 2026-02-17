@@ -12,14 +12,24 @@ interface DiscardPileProps {
   selectable: boolean;
   /** Callback when pile is clicked */
   onClick?: () => void;
+  /** Card size variant */
+  size?: "sm" | "md" | "lg";
 }
+
+const emptySizes = {
+  sm: "h-24 w-16",
+  md: "h-28 w-20",
+  lg: "h-36 w-24",
+};
 
 function DraggableDiscardCard({
   card,
   onClick,
+  size = "lg",
 }: {
   card: CardType;
   onClick?: () => void;
+  size?: "sm" | "md" | "lg";
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
@@ -40,7 +50,7 @@ function DraggableDiscardCard({
         faceUp={true}
         selectable={true}
         onClick={onClick}
-        size="lg"
+        size={size}
         className="cursor-grab active:cursor-grabbing"
       />
     </div>
@@ -51,15 +61,16 @@ export function DiscardPile({
   topCard,
   selectable,
   onClick,
+  size = "lg",
 }: DiscardPileProps) {
   if (!topCard) {
     return (
-      <div className="flex flex-col items-center gap-2">
-        <div className="flex h-36 w-24 items-center justify-center rounded-lg border-4 border-dashed border-green-700 bg-green-900/30">
+      <div className="flex flex-col items-center gap-1">
+        <div className={`flex ${emptySizes[size]} items-center justify-center rounded-lg border-4 border-dashed border-green-700 bg-green-900/30`}>
           <p className="text-center text-xs text-green-500">Empty</p>
         </div>
         <div className="text-center">
-          <p className="text-sm font-semibold text-white">Discard Pile</p>
+          <p className="text-xs font-semibold text-white">Discard</p>
           <p className="text-xs text-green-300">No cards</p>
         </div>
       </div>
@@ -67,21 +78,21 @@ export function DiscardPile({
   }
 
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className="flex flex-col items-center gap-1">
       {selectable ? (
-        <DraggableDiscardCard card={topCard} onClick={onClick} />
+        <DraggableDiscardCard card={topCard} onClick={onClick} size={size} />
       ) : (
         <Card
           card={topCard}
           faceUp={true}
           selectable={false}
-          size="lg"
+          size={size}
         />
       )}
       <div className="text-center">
-        <p className="text-sm font-semibold text-white">Discard Pile</p>
+        <p className="text-xs font-semibold text-white">Discard</p>
         <p className="text-xs text-green-300">
-          {selectable ? "Drag or click to take" : "\u00A0"}
+          {selectable ? "Tap to take" : "\u00A0"}
         </p>
       </div>
     </div>

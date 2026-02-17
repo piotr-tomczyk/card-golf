@@ -24,36 +24,34 @@ export function TurnIndicator({
   isFinalTurn,
 }: TurnIndicatorProps) {
   return (
-    <div className="rounded-lg bg-green-900/50 p-4 text-center">
-      <div className="space-y-2">
-        {/* Final turn warning */}
-        {isFinalTurn && (
-          <div className="mb-2 rounded-lg bg-yellow-600 px-4 py-2 text-lg font-bold text-white animate-pulse">
-            ⚠️ FINAL TURN!
-          </div>
-        )}
-
-        {/* Current turn */}
-        <div>
+    <div
+      className={`sticky top-0 z-10 rounded-lg px-4 py-3 ${
+        isFinalTurn
+          ? "bg-yellow-600 animate-pulse"
+          : isYourTurn
+            ? "bg-green-600"
+            : "bg-green-900/80"
+      }`}
+    >
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3 min-w-0">
+          {isFinalTurn && (
+            <span className="shrink-0 text-sm font-bold text-white">FINAL TURN</span>
+          )}
           {isYourTurn ? (
-            <p className="text-2xl font-bold text-green-300">
+            <span className="text-lg font-bold text-white truncate">
               Your Turn
-            </p>
+            </span>
           ) : (
-            <p className="text-2xl font-bold text-white">
-              {currentPlayerName}'s Turn
-            </p>
+            <span className="text-lg font-bold text-white/80 truncate">
+              {currentPlayerName}&apos;s Turn
+            </span>
           )}
         </div>
 
-        {/* Round and turn info */}
-        <div className="flex items-center justify-center gap-4 text-sm text-green-300">
-          <span>
-            Round {currentRound} of {totalRounds}
-          </span>
-          <span>•</span>
-          <span>Turn {turnNumber}</span>
-        </div>
+        <span className="shrink-0 text-sm text-white/70">
+          Round {currentRound}/{totalRounds} &middot; Turn {turnNumber}
+        </span>
       </div>
     </div>
   );
