@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { api, type RouterOutputs } from "@/trpc/react";
 import { GameLobby } from "./GameLobby";
 import { SetupPhase } from "./SetupPhase";
@@ -15,7 +16,24 @@ interface GameBoardProps {
 }
 
 export function GameBoard({ code, userId, initialGame }: GameBoardProps) {
+  const router = useRouter();
   const hasAttemptedJoin = useRef(false);
+  const [needsGuestName, setNeedsGuestName] = useState(false);
+  const [guestNameInput, setGuestNameInput] = useState("");
+
+  // Check for guest identity immediately on mount (before any queries fire)
+  const [hasIdentity, setHasIdentity] = useState(() => {
+    if (typeof window === "undefined") return true; // SSR: assume yes
+    if (userId) return true; // authenticated user
+    return !!localStorage.getItem("guestId");
+  });
+
+  useEffect(() => {
+    if (!userId && typeof window !== "undefined" && !localStorage.getItem("guestId")) {
+      setNeedsGuestName(true);
+      setHasIdentity(false);
+    }
+  }, [userId]);
 
   const joinGame = api.game.join.useMutation({
     onSuccess: () => {
@@ -31,10 +49,11 @@ export function GameBoard({ code, userId, initialGame }: GameBoardProps) {
       }
     },
   });
-  // Fetch game state with polling
+  // Fetch game state with polling - disabled until guest has identity
   const { data: game, isLoading, error, refetch } = api.game.getByCode.useQuery(
     { code },
     {
+      enabled: hasIdentity,
       // Poll every 2 seconds when waiting for game state changes
       refetchInterval: (query) => {
         const game = query.state.data;
@@ -96,6 +115,56 @@ export function GameBoard({ code, userId, initialGame }: GameBoardProps) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [game?.status, game?.players.length, userId, code]);
+
+  const handleGuestNameSubmit = () => {
+    const name = guestNameInput.trim();
+    if (!name) return;
+
+    localStorage.setItem("guestName", name);
+    if (!localStorage.getItem("guestId")) {
+      const newGuestId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      localStorage.setItem("guestId", newGuestId);
+    }
+
+    // Reload the page so the tRPC client picks up the new localStorage headers
+    router.refresh();
+    setNeedsGuestName(false);
+    setHasIdentity(true);
+  };
+
+  if (needsGuestName) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-green-800 to-green-950 text-white">
+        <div className="w-full max-w-md space-y-4 px-4">
+          <div className="rounded-lg bg-green-900/50 p-6 space-y-4">
+            <h2 className="text-2xl font-bold text-center">
+              What&apos;s your name?
+            </h2>
+            <p className="text-sm text-green-200 text-center">
+              Enter a display name to join the game
+            </p>
+            <input
+              type="text"
+              value={guestNameInput}
+              onChange={(e) => setGuestNameInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleGuestNameSubmit()}
+              placeholder="Your name"
+              maxLength={30}
+              className="w-full rounded-lg bg-green-950 px-4 py-3 text-white placeholder-green-400 outline-none focus:ring-2 focus:ring-green-500"
+              autoFocus
+            />
+            <button
+              onClick={handleGuestNameSubmit}
+              disabled={!guestNameInput.trim()}
+              className="w-full rounded-lg bg-green-600 px-6 py-3 font-semibold text-white transition hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading || !game || joinGame.isPending) {
     return (
