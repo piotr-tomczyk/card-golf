@@ -4,3 +4,76 @@
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
+
+@keyframes hand-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(74, 222, 128, 0.25); }
+  50% { box-shadow: 0 0 35px rgba(74, 222, 128, 0.45); }
+}
+
+.your-turn-glow {
+  animation: hand-glow 2s ease-in-out infinite;
+}
+
+@keyframes matched-border-spin {
+  0% { --matched-angle: 0deg; }
+  100% { --matched-angle: 360deg; }
+}
+
+@property --matched-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.matched-card {
+  position: relative;
+}
+
+.matched-card::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 10px;
+  padding: 2px;
+  background: conic-gradient(
+    from var(--matched-angle),
+    #7dd3fc,
+    #38bdf8,
+    #0ea5e9,
+    #06b6d4,
+    #67e8f9,
+    #7dd3fc
+  );
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  animation: matched-border-spin 3s linear infinite;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.matched-card::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 12px;
+  background: conic-gradient(
+    from var(--matched-angle),
+    rgba(125, 211, 252, 0.4),
+    rgba(56, 189, 248, 0.1),
+    rgba(14, 165, 233, 0.4),
+    rgba(6, 182, 212, 0.1),
+    rgba(103, 232, 249, 0.4),
+    rgba(125, 211, 252, 0.1)
+  );
+  filter: blur(6px);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  padding: 4px;
+  animation: matched-border-spin 3s linear infinite;
+  z-index: 0;
+  pointer-events: none;
+}

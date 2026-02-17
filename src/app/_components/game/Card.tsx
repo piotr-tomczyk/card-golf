@@ -15,6 +15,8 @@ export interface CardProps {
   selected?: boolean;
   /** Whether a drag is hovering over this card (drop target) */
   isDropTarget?: boolean;
+  /** Whether this card is part of a matched column */
+  matched?: boolean;
   /** Size variant */
   size?: "sm" | "md" | "lg" | "xl";
   /** Additional CSS classes */
@@ -28,6 +30,7 @@ export function Card({
   selectable = false,
   selected = false,
   isDropTarget = false,
+  matched = false,
   size = "md",
   className = "",
 }: CardProps) {
@@ -51,6 +54,7 @@ export function Card({
         transition-all
         duration-200
         ${selectable ? "cursor-pointer hover:scale-105 hover:shadow-lg" : "cursor-default"}
+        ${matched ? "matched-card" : ""}
         ${selected ? "ring-4 ring-yellow-400 scale-105 shadow-lg" : ""}
         ${isDropTarget ? "ring-4 ring-blue-400 scale-110 shadow-lg shadow-blue-500/50" : ""}
         ${!faceUp && selectable ? "hover:brightness-110" : ""}
@@ -70,7 +74,7 @@ export function Card({
           alt={faceUp && card ? `${card} card` : "Card back"}
           fill
           draggable={false}
-          className="rounded-lg object-contain select-none"
+          className="rounded-lg object-fill select-none"
           unoptimized // SVGs don't need optimization
         />
       </div>
