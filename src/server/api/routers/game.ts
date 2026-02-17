@@ -104,6 +104,40 @@ async function saveGameState(
   }
 }
 
+/** Process round end: calculate scores, save to DB, update game state.
+ *  Idempotent — checks for existing scores before inserting. */
+async function processRoundEnd(
+  database: typeof import("@/server/db").db,
+  state: GameState,
+): Promise<GameState> {
+  if (state.status !== "round_ended") return state;
+
+  const result = handleRoundEnd(state);
+
+  // Check if scores were already saved (idempotent)
+  const existingScores = await database.query.roundScores.findMany({
+    where: (rs, { eq, and: andOp }) =>
+      andOp(
+        eq(roundScores.gameId, state.id),
+        eq(roundScores.roundNumber, state.currentRound),
+      ),
+  });
+
+  if (existingScores.length === 0) {
+    for (const rs of result.roundScores) {
+      await database.insert(roundScores).values({
+        gameId: state.id,
+        playerId: rs.playerId,
+        roundNumber: state.currentRound,
+        score: rs.score,
+        hand: rs.hand,
+      });
+    }
+  }
+
+  return result.state;
+}
+
 /** Strip hidden info from game state for a specific player */
 function sanitizeForPlayer(state: GameState, playerId: string) {
   return {
@@ -316,6 +350,7 @@ export const gameRouter = createTRPCRouter({
         }
         throw e;
       }
+      state = await processRoundEnd(ctx.db, state);
       await saveGameState(ctx.db, state);
       return sanitizeForPlayer(state, ctx.playerId);
     }),
@@ -332,6 +367,7 @@ export const gameRouter = createTRPCRouter({
         }
         throw e;
       }
+      state = await processRoundEnd(ctx.db, state);
       await saveGameState(ctx.db, state);
       return sanitizeForPlayer(state, ctx.playerId);
     }),
@@ -352,6 +388,7 @@ export const gameRouter = createTRPCRouter({
         }
         throw e;
       }
+      state = await processRoundEnd(ctx.db, state);
       await saveGameState(ctx.db, state);
       return sanitizeForPlayer(state, ctx.playerId);
     }),
@@ -369,22 +406,7 @@ export const gameRouter = createTRPCRouter({
         throw e;
       }
 
-      // If round just ended, calculate and save round scores immediately
-      if (state.status === "round_ended") {
-        const result = handleRoundEnd(state);
-        state = result.state;
-
-        // Save round scores
-        for (const rs of result.roundScores) {
-          await ctx.db.insert(roundScores).values({
-            gameId: state.id,
-            playerId: rs.playerId,
-            roundNumber: state.currentRound,
-            score: rs.score,
-            hand: rs.hand,
-          });
-        }
-      }
+      state = await processRoundEnd(ctx.db, state);
 
       await saveGameState(ctx.db, state);
       return sanitizeForPlayer(state, ctx.playerId);
@@ -395,43 +417,12 @@ export const gameRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       let state = await loadGameState(ctx.db, input.gameId);
 
-      // Process round end if status is still round_ended
-      // (scores may have already been saved by uncoverCard)
-      if (state.status === "round_ended") {
-        // Check if scores were already saved for this round
-        const existingScores = await ctx.db.query.roundScores.findMany({
-          where: (rs, { eq, and }) =>
-            and(
-              eq(roundScores.gameId, state.id),
-              eq(roundScores.roundNumber, state.currentRound),
-            ),
-        });
+      // Process round end if not already processed
+      state = await processRoundEnd(ctx.db, state);
 
-        // Only calculate and save if not already saved
-        if (existingScores.length === 0) {
-          const result = handleRoundEnd(state);
-          state = result.state;
-
-          // Save round scores
-          for (const rs of result.roundScores) {
-            await ctx.db.insert(roundScores).values({
-              gameId: state.id,
-              playerId: rs.playerId,
-              roundNumber: state.currentRound,
-              score: rs.score,
-              hand: rs.hand,
-            });
-          }
-        } else {
-          // Scores already saved, just update state
-          const result = handleRoundEnd(state);
-          state = result.state;
-        }
-
-        if (state.status === "finished") {
-          await saveGameState(ctx.db, state);
-          return sanitizeForPlayer(state, ctx.playerId);
-        }
+      if (state.status === "finished") {
+        await saveGameState(ctx.db, state);
+        return sanitizeForPlayer(state, ctx.playerId);
       }
 
       try {
