@@ -112,8 +112,6 @@ async function processRoundEnd(
 ): Promise<GameState> {
   if (state.status !== "round_ended") return state;
 
-  const result = handleRoundEnd(state);
-
   // Check if scores were already saved (idempotent)
   const existingScores = await database.query.roundScores.findMany({
     where: (rs, { eq, and: andOp }) =>
@@ -123,16 +121,21 @@ async function processRoundEnd(
       ),
   });
 
-  if (existingScores.length === 0) {
-    for (const rs of result.roundScores) {
-      await database.insert(roundScores).values({
-        gameId: state.id,
-        playerId: rs.playerId,
-        roundNumber: state.currentRound,
-        score: rs.score,
-        hand: rs.hand,
-      });
-    }
+  // Scores already processed — totalScore in DB is already correct
+  if (existingScores.length > 0) {
+    return state;
+  }
+
+  const result = handleRoundEnd(state);
+
+  for (const rs of result.roundScores) {
+    await database.insert(roundScores).values({
+      gameId: state.id,
+      playerId: rs.playerId,
+      roundNumber: state.currentRound,
+      score: rs.score,
+      hand: rs.hand,
+    });
   }
 
   return result.state;
