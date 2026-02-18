@@ -15,6 +15,7 @@ export function GameLobbyActions({ session }: GameLobbyActionsProps) {
   const [guestName, setGuestName] = useState("");
   const [showGuestInput, setShowGuestInput] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [totalRounds, setTotalRounds] = useState(9);
 
   // Load guest name from localStorage on mount
   useEffect(() => {
@@ -75,7 +76,7 @@ export function GameLobbyActions({ session }: GameLobbyActionsProps) {
     }
 
     console.log("Calling createGame.mutate()");
-    createGame.mutate();
+    createGame.mutate({ totalRounds });
   };
 
   const handleJoinGame = () => {
@@ -164,6 +165,29 @@ export function GameLobbyActions({ session }: GameLobbyActionsProps) {
       {/* Create Game */}
       <div className="rounded-lg bg-green-900/50 p-6 space-y-4">
         <h2 className="text-2xl font-bold text-center">Create New Game</h2>
+
+        {/* Rounds picker */}
+        <div className="flex items-center justify-between rounded-lg bg-green-950/50 px-4 py-3">
+          <span className="text-green-200 font-medium">Rounds</span>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setTotalRounds((r) => Math.max(1, r - 1))}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-green-700 text-xl font-bold leading-none hover:bg-green-600 transition"
+              aria-label="Fewer rounds"
+            >
+              −
+            </button>
+            <span className="w-6 text-center text-xl font-bold">{totalRounds}</span>
+            <button
+              onClick={() => setTotalRounds((r) => Math.min(18, r + 1))}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-green-700 text-xl font-bold leading-none hover:bg-green-600 transition"
+              aria-label="More rounds"
+            >
+              +
+            </button>
+          </div>
+        </div>
+
         <button
           onClick={handleCreateGame}
           disabled={createGame.isPending}

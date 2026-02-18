@@ -29,16 +29,23 @@ export function RoundEndScreen({ game, refetch }: RoundEndScreenProps) {
     startNextRound.mutate({ gameId: game.id });
   };
 
-  // Calculate who won this round
-  const roundWinner = currentRoundScores?.reduce<
-    (typeof currentRoundScores)[number] | undefined
-  >(
-    (lowest, current) =>
-      !lowest || current.score < lowest.score ? current : lowest,
-    undefined,
-  );
+  // Calculate who won this round (lowest score wins; ties are draws)
+  const lowestRoundScore =
+    currentRoundScores && currentRoundScores.length > 0
+      ? Math.min(...currentRoundScores.map((s) => s.score))
+      : undefined;
 
-  const winnerPlayer = game.players.find((p) => p.id === roundWinner?.playerId);
+  const roundWinnerIds =
+    lowestRoundScore !== undefined
+      ? currentRoundScores
+          ?.filter((s) => s.score === lowestRoundScore)
+          .map((s) => s.playerId) ?? []
+      : [];
+
+  const isRoundDraw = roundWinnerIds.length > 1;
+  const roundWinnerPlayers = game.players.filter((p) =>
+    roundWinnerIds.includes(p.id)
+  );
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-green-800 to-green-950 px-4 py-8 text-white">
@@ -48,9 +55,11 @@ export function RoundEndScreen({ game, refetch }: RoundEndScreenProps) {
           <h1 className="text-5xl font-extrabold tracking-tight sm:text-6xl">
             Round {game.currentRound} Complete!
           </h1>
-          {winnerPlayer && (
+          {roundWinnerPlayers.length > 0 && (
             <p className="text-2xl text-green-300">
-              {winnerPlayer.displayName} wins this round!
+              {isRoundDraw
+                ? `${roundWinnerPlayers.map((p) => p.displayName).join(" & ")} tie this round!`
+                : `${roundWinnerPlayers[0]!.displayName} wins this round!`}
             </p>
           )}
         </div>
@@ -66,7 +75,7 @@ export function RoundEndScreen({ game, refetch }: RoundEndScreenProps) {
               <div
                 key={player.id}
                 className={`rounded-lg p-6 ${
-                  player.id === roundWinner?.playerId
+                  roundWinnerIds.includes(player.id)
                     ? "bg-yellow-900/30 border-2 border-yellow-600"
                     : "bg-green-900/30"
                 }`}

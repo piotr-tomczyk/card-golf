@@ -485,10 +485,18 @@ export const gameRouter = createTRPCRouter({
       // Sort by total score (lowest wins)
       playerResults.sort((a, b) => a.totalScore - b.totalScore);
 
+      let winnerIds: string[] | null = null;
+      if (state.status === "finished") {
+        const lowestScore = playerResults[0]?.totalScore;
+        winnerIds = playerResults
+          .filter((p) => p.totalScore === lowestScore)
+          .map((p) => p.playerId);
+      }
+
       return {
         status: state.status,
         players: playerResults,
-        winnerId: state.status === "finished" ? playerResults[0]?.playerId : null,
+        winnerIds,
       };
     }),
 

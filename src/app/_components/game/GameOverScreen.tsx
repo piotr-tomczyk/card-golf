@@ -16,10 +16,10 @@ export function GameOverScreen({ game }: GameOverScreenProps) {
     gameId: game.id,
   });
 
-  // Determine winner (lowest total score)
-  const winner = game.players.reduce((lowest, current) =>
-    current.totalScore < lowest.totalScore ? current : lowest
-  , game.players[0]!);
+  // Determine winner(s) — lowest total score wins; multiple players can tie
+  const lowestScore = Math.min(...game.players.map((p) => p.totalScore));
+  const winners = game.players.filter((p) => p.totalScore === lowestScore);
+  const isDraw = winners.length > 1;
 
   const handlePlayAgain = () => {
     router.push("/");
@@ -35,13 +35,17 @@ export function GameOverScreen({ game }: GameOverScreenProps) {
         {/* Winner Announcement */}
         <div className="text-center space-y-4">
           <h1 className="text-6xl font-extrabold tracking-tight sm:text-7xl animate-bounce">
-            🏆
+            {isDraw ? "🤝" : "🏆"}
           </h1>
           <h2 className="text-5xl font-extrabold tracking-tight sm:text-6xl text-yellow-400">
-            {winner.displayName} Wins!
+            {isDraw
+              ? "It's a Draw!"
+              : `${winners[0]!.displayName} Wins!`}
           </h2>
           <p className="text-2xl text-green-200">
-            Final Score: {winner.totalScore} points
+            {isDraw
+              ? `${winners.map((w) => w.displayName).join(" & ")} tied with ${lowestScore} points`
+              : `Final Score: ${lowestScore} points`}
           </p>
         </div>
 
@@ -51,18 +55,21 @@ export function GameOverScreen({ game }: GameOverScreenProps) {
           <div className="space-y-3">
             {game.players
               .sort((a, b) => a.totalScore - b.totalScore)
-              .map((player, index) => (
+              .map((player, index, sorted) => {
+                // Compute dense rank: tied players share the same rank
+                const rank = sorted.findIndex((p) => p.totalScore === player.totalScore) + 1;
+                return (
                 <div
                   key={player.id}
                   className={`flex items-center justify-between rounded-lg p-4 ${
-                    index === 0
+                    player.totalScore === lowestScore
                       ? "bg-yellow-900/50 border-2 border-yellow-600"
                       : "bg-green-800/50"
                   }`}
                 >
                   <div className="flex items-center gap-4">
                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-700 text-2xl font-bold">
-                      {index + 1}
+                      {rank}
                     </div>
                     <div>
                       <p className="text-xl font-bold">{player.displayName}</p>
@@ -78,7 +85,8 @@ export function GameOverScreen({ game }: GameOverScreenProps) {
                     <p className="text-sm text-green-300">points</p>
                   </div>
                 </div>
-              ))}
+                );
+              })}
           </div>
         </div>
 
