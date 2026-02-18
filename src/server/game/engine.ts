@@ -130,22 +130,20 @@ export function handleRoundEnd(state: GameState): {
     player.totalScore += rs.score;
   }
 
-  // Check if this was the last round
-  if (next.currentRound >= next.config.totalRounds) {
-    next.status = "finished";
-  }
-
   return { state: next, roundScores };
 }
 
-/** Start the next round */
+/** Start the next round, or finalize the game if all rounds are complete */
 export function handleStartNextRound(state: GameState): GameState {
   if (state.status !== "round_ended") {
     throw new GameError("Cannot start next round - round not ended");
   }
 
+  // Last round finished — transition to finished so GameOverScreen renders
   if (state.currentRound >= state.config.totalRounds) {
-    throw new GameError("All rounds have been played");
+    const next = JSON.parse(JSON.stringify(state)) as GameState;
+    next.status = "finished";
+    return next;
   }
 
   let next = JSON.parse(JSON.stringify(state)) as GameState;

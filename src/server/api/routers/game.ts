@@ -423,11 +423,6 @@ export const gameRouter = createTRPCRouter({
       // Process round end if not already processed
       state = await processRoundEnd(ctx.db, state);
 
-      if (state.status === "finished") {
-        await saveGameState(ctx.db, state);
-        return sanitizeForPlayer(state, ctx.playerId);
-      }
-
       try {
         state = handleStartNextRound(state);
       } catch (e) {
