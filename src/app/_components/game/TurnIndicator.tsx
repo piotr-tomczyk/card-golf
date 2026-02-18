@@ -25,7 +25,7 @@ export function TurnIndicator({
 }: TurnIndicatorProps) {
   if (isFinalTurn) {
     return (
-      <div className="sticky top-0 z-10 overflow-hidden">
+      <div className="overflow-hidden">
         {/* Amber background with subtle stripe pattern */}
         <div
           className="relative bg-amber-500 px-3 py-2 text-center"
@@ -57,7 +57,7 @@ export function TurnIndicator({
 
   return (
     <div
-      className={`sticky top-0 z-10 rounded-lg px-4 py-3 ${
+      className={`rounded-lg px-4 py-3 ${
         isYourTurn ? "bg-green-600" : "bg-green-900/80"
       }`}
     >

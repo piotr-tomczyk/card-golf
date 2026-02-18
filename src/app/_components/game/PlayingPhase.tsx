@@ -16,6 +16,7 @@ import { DrawnCardInline } from "./DrawnCardOverlay";
 import { TurnIndicator } from "./TurnIndicator";
 import { ActionBar, type TurnState } from "./ActionBar";
 import { ScoreBoard } from "./ScoreBoard";
+import { ScoreStrip } from "./ScoreStrip";
 import { api, type RouterOutputs } from "@/trpc/react";
 import { CARD_VALUES, getRank } from "@/server/game/types";
 
@@ -292,15 +293,37 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
   return (
     <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
       <div className="flex min-h-screen flex-col bg-gradient-to-b from-green-800 to-green-950 px-2 py-2 text-white md:px-4 md:py-3 md:h-screen md:overflow-hidden">
-          {/* Turn Indicator - sticky at top */}
-          <TurnIndicator
-            currentPlayerName={currentTurnPlayer.displayName}
-            isYourTurn={isYourTurn}
-            turnNumber={game.turnNumber}
-            currentRound={game.currentRound}
-            totalRounds={totalRounds}
-            isFinalTurn={game.status === "final_turn"}
-          />
+          {/* Sticky header: turn indicator + mobile score strip */}
+          <div className="sticky top-0 z-10 flex flex-col gap-0">
+            <TurnIndicator
+              currentPlayerName={currentTurnPlayer.displayName}
+              isYourTurn={isYourTurn}
+              turnNumber={game.turnNumber}
+              currentRound={game.currentRound}
+              totalRounds={totalRounds}
+              isFinalTurn={game.status === "final_turn"}
+            />
+
+            {/* Score Strip - always-visible on mobile so you don't need to scroll */}
+            {opponent && !isDesktop && (
+              <ScoreStrip
+                you={{
+                  id: currentPlayer.id,
+                  displayName: currentPlayer.displayName,
+                  totalScore: currentPlayer.totalScore,
+                  roundScore: calcRoundScore(currentPlayer.hand),
+                  isYou: true,
+                }}
+                opponent={{
+                  id: opponent.id,
+                  displayName: opponent.displayName,
+                  totalScore: opponent.totalScore,
+                  roundScore: calcRoundScore(opponent.hand),
+                  isYou: false,
+                }}
+              />
+            )}
+          </div>
 
           {/* Main game area — 3 columns on desktop: opponent | piles+actions | your hand */}
           <div className="flex-1 flex flex-col md:flex-row md:items-center md:justify-center gap-2 md:gap-8 mt-2 md:mt-3 min-h-0">
@@ -317,8 +340,8 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
               </div>
             )}
 
-            {/* Center: piles + drawn card + actions */}
-            <div className="flex flex-col items-center gap-3 shrink-0">
+            {/* Center: piles + drawn card + actions — moves to bottom on mobile */}
+            <div className="order-3 md:order-2 flex flex-col items-center gap-3 shrink-0">
               {/* Piles - hidden when holding drawn card or choosing replacement */}
               {turnState === "idle" && (
                 <div className="flex items-start justify-center gap-6 rounded-lg bg-green-900/30 p-3 md:p-4">
@@ -364,8 +387,8 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
               />
             </div>
 
-            {/* Current Player Hand */}
-            <div className={`rounded-lg p-3 md:p-4 shrink-0 transition-all duration-500 ${
+            {/* Current Player Hand — sits above piles on mobile */}
+            <div className={`order-2 md:order-3 rounded-lg p-3 md:p-4 shrink-0 transition-all duration-500 ${
               isYourTurn
                 ? "bg-green-800/60 ring-2 ring-green-400/70 your-turn-glow"
                 : "bg-green-900/50"
