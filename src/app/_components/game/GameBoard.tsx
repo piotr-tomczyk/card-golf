@@ -213,10 +213,10 @@ export function GameBoard({ code, userId, initialGame }: GameBoardProps) {
       return <PlayingPhase game={game} refetch={refetch} userId={userId} />;
 
     case "round_ended":
-      return <RoundEndScreen game={game} refetch={refetch} />;
+      return <RoundEndScreen game={game} refetch={refetch} userId={userId} />;
 
     case "finished":
-      return <GameOverScreen game={game} />;
+      return <GameOverScreen game={game} userId={userId} />;
 
     case "abandoned":
       return (

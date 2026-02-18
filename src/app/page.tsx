@@ -2,6 +2,7 @@ import { auth } from "@/server/auth";
 import { HydrateClient } from "@/trpc/server";
 import { GameLobbyActions } from "@/app/_components/GameLobbyActions";
 import { getTranslations } from "next-intl/server";
+import { HowToPlay } from "@/app/_components/HowToPlay";
 
 export default async function Home() {
   const session = await auth();
@@ -21,6 +22,8 @@ export default async function Home() {
           </div>
 
           <GameLobbyActions session={session} />
+
+          <HowToPlay />
 
           {!session?.user && (
             <div className="text-center text-sm text-green-300">

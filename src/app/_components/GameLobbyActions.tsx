@@ -221,7 +221,7 @@ export function GameLobbyActions({ session }: GameLobbyActionsProps) {
           onChange={(e) => setJoinCode(extractCode(e.target.value))}
           onKeyDown={(e) => e.key === "Enter" && handleJoinGame()}
           placeholder={t("enterCode")}
-          className="w-full rounded-lg bg-green-950 px-4 py-3 text-center text-2xl font-mono uppercase tracking-widest text-white placeholder-green-400 outline-none focus:ring-2 focus:ring-green-500"
+          className="w-full rounded-lg bg-green-950 px-4 py-3 text-center text-2xl font-mono uppercase tracking-widest text-white placeholder:text-sm placeholder:tracking-normal placeholder:normal-case placeholder:font-sans placeholder:text-green-400 outline-none focus:ring-2 focus:ring-green-500"
         />
         <button
           onClick={handleJoinGame}
