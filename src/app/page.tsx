@@ -1,9 +1,11 @@
 import { auth } from "@/server/auth";
 import { HydrateClient } from "@/trpc/server";
 import { GameLobbyActions } from "@/app/_components/GameLobbyActions";
+import { getTranslations } from "next-intl/server";
 
 export default async function Home() {
   const session = await auth();
+  const t = await getTranslations("Home");
 
   return (
     <HydrateClient>
@@ -11,10 +13,10 @@ export default async function Home() {
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
           <div className="text-center">
             <h1 className="text-6xl font-extrabold tracking-tight sm:text-7xl mb-4">
-              Card Golf
+              {t("title")}
             </h1>
             <p className="text-xl text-green-200">
-              A fun multiplayer card game
+              {t("subtitle")}
             </p>
           </div>
 
@@ -22,15 +24,15 @@ export default async function Home() {
 
           {!session?.user && (
             <div className="text-center text-sm text-green-300">
-              <p>Playing as a guest? Your name will be stored locally.</p>
+              <p>{t("guestNote")}</p>
               <p className="mt-2">
                 <a
                   href="/api/auth/signin"
                   className="underline hover:text-white"
                 >
-                  Sign in with Discord
+                  {t("signIn")}
                 </a>{" "}
-                to save your stats
+                {t("saveStats")}
               </p>
             </div>
           )}

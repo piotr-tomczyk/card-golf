@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { PlayerHand } from "./PlayerHand";
 import { api, type RouterOutputs } from "@/trpc/react";
 
@@ -13,6 +14,7 @@ interface SetupPhaseProps {
 }
 
 export function SetupPhase({ game, refetch, userId }: SetupPhaseProps) {
+  const t = useTranslations("SetupPhase");
   const [selectedPositions, setSelectedPositions] = useState<number[]>([]);
 
   const revealInitialCards = api.game.revealInitialCards.useMutation({
@@ -47,7 +49,7 @@ export function SetupPhase({ game, refetch, userId }: SetupPhaseProps) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-green-800 to-green-950 text-white">
         <div className="text-center">
-          <p className="text-xl">Unable to identify player</p>
+          <p className="text-xl">{t("unableToIdentify")}</p>
         </div>
       </div>
     );
@@ -91,19 +93,19 @@ export function SetupPhase({ game, refetch, userId }: SetupPhaseProps) {
         {/* Header */}
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
-            Setup Phase
+            {t("setupPhase")}
           </h1>
-          <p className="text-xl text-green-200">Round {game.currentRound}</p>
+          <p className="text-xl text-green-200">{t("round", { n: game.currentRound })}</p>
         </div>
 
         {/* Instructions */}
         {!hasCompletedSetup && (
           <div className="rounded-lg bg-yellow-900/50 border-2 border-yellow-600 p-6 text-center">
             <p className="text-2xl font-bold text-yellow-200">
-              Choose 2 cards to reveal
+              {t("choose2Cards")}
             </p>
             <p className="mt-2 text-yellow-300">
-              Click on two face-down cards in your hand, then click Confirm
+              {t("clickTwoCards")}
             </p>
           </div>
         )}
@@ -111,18 +113,18 @@ export function SetupPhase({ game, refetch, userId }: SetupPhaseProps) {
         {hasCompletedSetup && !allPlayersReady && (
           <div className="rounded-lg bg-blue-900/50 border-2 border-blue-600 p-6 text-center">
             <p className="text-2xl font-bold text-blue-200">
-              Waiting for opponent...
+              {t("waitingForOpponent")}
             </p>
             <p className="mt-2 text-blue-300">
-              {opponent?.displayName} is choosing their cards
+              {t("opponentChoosing", { name: opponent?.displayName ?? "" })}
             </p>
           </div>
         )}
 
         {allPlayersReady && (
           <div className="rounded-lg bg-green-600 p-6 text-center">
-            <p className="text-2xl font-bold">All players ready!</p>
-            <p className="mt-2">Starting game...</p>
+            <p className="text-2xl font-bold">{t("allPlayersReady")}</p>
+            <p className="mt-2">{t("startingGame")}</p>
           </div>
         )}
 
@@ -137,7 +139,7 @@ export function SetupPhase({ game, refetch, userId }: SetupPhaseProps) {
             />
             {opponent.setupComplete && (
               <p className="mt-3 text-center text-sm text-green-400">
-                ✓ Ready
+                {t("ready")}
               </p>
             )}
           </div>
@@ -147,7 +149,7 @@ export function SetupPhase({ game, refetch, userId }: SetupPhaseProps) {
         <div className="rounded-lg bg-green-900/50 p-6">
           <PlayerHand
             cards={currentPlayer.hand}
-            label="Your Hand"
+            label={t("youLabel") + " – " + (hasCompletedSetup ? t("ready") : t("choosing"))}
             isCurrentPlayer={true}
             onCardClick={handleCardClick}
             selectablePositions={
@@ -172,8 +174,8 @@ export function SetupPhase({ game, refetch, userId }: SetupPhaseProps) {
                 className="rounded-lg bg-green-600 px-8 py-4 text-xl font-semibold text-white transition hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {revealInitialCards.isPending
-                  ? "Confirming..."
-                  : `Confirm Selection (${selectedPositions.length}/2)`}
+                  ? t("confirming")
+                  : t("confirmSelection", { count: selectedPositions.length })}
               </button>
             </div>
           )}
@@ -188,15 +190,15 @@ export function SetupPhase({ game, refetch, userId }: SetupPhaseProps) {
         {/* Player Status */}
         <div className="grid grid-cols-2 gap-4 text-center text-sm">
           <div className="rounded-lg bg-green-900/30 p-3">
-            <p className="text-green-300">You</p>
+            <p className="text-green-300">{t("youLabel")}</p>
             <p className="mt-1 font-bold">
-              {hasCompletedSetup ? "✓ Ready" : "Choosing..."}
+              {hasCompletedSetup ? t("ready") : t("choosing")}
             </p>
           </div>
           <div className="rounded-lg bg-green-900/30 p-3">
             <p className="text-green-300">{opponent?.displayName}</p>
             <p className="mt-1 font-bold">
-              {opponent?.setupComplete ? "✓ Ready" : "Choosing..."}
+              {opponent?.setupComplete ? t("ready") : t("choosing")}
             </p>
           </div>
         </div>

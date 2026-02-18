@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 interface TurnIndicatorProps {
   /** Current player name */
   currentPlayerName: string;
@@ -23,6 +25,8 @@ export function TurnIndicator({
   totalRounds,
   isFinalTurn,
 }: TurnIndicatorProps) {
+  const t = useTranslations("TurnIndicator");
+
   if (isFinalTurn) {
     return (
       <div className="overflow-hidden">
@@ -38,17 +42,17 @@ export function TurnIndicator({
           <p
             className="text-xs font-black uppercase tracking-[0.25em] text-amber-900/80"
           >
-            ⚑ Final Turn ⚑
+            {t("finalTurnLabel")}
           </p>
 
           {/* Who's playing */}
           <p className="mt-0.5 text-base font-bold leading-tight text-white drop-shadow-sm">
-            {isYourTurn ? "Your Turn — make it count!" : `${currentPlayerName}'s Turn`}
+            {isYourTurn ? t("yourTurnFinal") : t("opponentTurnFinal", { name: currentPlayerName })}
           </p>
 
           {/* Round / turn counter */}
           <p className="mt-0.5 text-xs font-semibold text-amber-900/70">
-            Round {currentRound}/{totalRounds} · Turn {turnNumber}
+            {t("roundTurnCounter", { current: currentRound, total: totalRounds, turn: turnNumber })}
           </p>
         </div>
       </div>
@@ -63,10 +67,10 @@ export function TurnIndicator({
     >
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-0.5">
         <span className={`text-base font-bold leading-tight text-white ${!isYourTurn ? "text-white/80" : ""}`}>
-          {isYourTurn ? "Your Turn" : `${currentPlayerName}'s Turn`}
+          {isYourTurn ? t("yourTurn") : t("opponentTurn", { name: currentPlayerName })}
         </span>
         <span className="text-sm text-white/70 shrink-0">
-          Round {currentRound}/{totalRounds} · Turn {turnNumber}
+          {t("roundTurnCounter", { current: currentRound, total: totalRounds, turn: turnNumber })}
         </span>
       </div>
     </div>

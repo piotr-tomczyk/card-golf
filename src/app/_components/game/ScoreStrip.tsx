@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 interface ScoreStripPlayer {
   id: string;
   displayName: string;
@@ -14,6 +16,7 @@ interface ScoreStripProps {
 }
 
 export function ScoreStrip({ you, opponent }: ScoreStripProps) {
+  const t = useTranslations("ScoreStrip");
   const youLeading = you.totalScore < opponent.totalScore;
   const tied = you.totalScore === opponent.totalScore;
 
@@ -30,7 +33,7 @@ export function ScoreStrip({ you, opponent }: ScoreStripProps) {
         }`}
       >
         <span className="text-[10px] font-semibold uppercase tracking-widest text-green-400">
-          You
+          {t("you")}
         </span>
         <div className="flex items-baseline gap-1.5">
           <span className="text-xl font-black tabular-nums leading-none text-white">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import {
   DndContext,
   type DragEndEvent,
@@ -41,6 +42,7 @@ function useIsDesktop() {
 }
 
 export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
+  const t = useTranslations("PlayingPhase");
   const isDesktop = useIsDesktop();
   const [turnState, setTurnState] = useState<TurnState>("idle");
   const [isChoosingForDiscard, setIsChoosingForDiscard] = useState(false);
@@ -127,7 +129,7 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-green-800 to-green-950 text-white">
         <div className="text-center">
-          <p className="text-xl">Unable to identify players</p>
+          <p className="text-xl">{t("unableToIdentify")}</p>
         </div>
       </div>
     );
@@ -332,7 +334,7 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
               <div className="rounded-lg bg-green-900/30 p-3 md:p-4 shrink-0">
                 <PlayerHand
                   cards={opponent.hand}
-                  label={`${opponent.displayName} (${calcRoundScore(opponent.hand)} pts)`}
+                  label={t("opponentHand", { name: opponent.displayName, pts: calcRoundScore(opponent.hand) })}
                   isCurrentPlayer={false}
                   matchedPositions={getMatchedPositions(opponent.hand)}
                   size={isDesktop ? "lg" : "sm"}
@@ -376,7 +378,7 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
                   disabled={isPending}
                   className="rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Cancel
+                  {t("cancel")}
                 </button>
               )}
 
@@ -395,7 +397,7 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
             }`}>
               <PlayerHand
                 cards={currentPlayer.hand}
-                label={`Your Hand (${calcRoundScore(currentPlayer.hand)} pts)`}
+                label={t("yourHand", { pts: calcRoundScore(currentPlayer.hand) })}
                 isCurrentPlayer={true}
                 onCardClick={handleCardClick}
                 selectablePositions={selectablePositions}
@@ -433,17 +435,17 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
           <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-sm">
             <div className="mx-4 w-full max-w-sm rounded-xl bg-green-900 p-6 shadow-2xl border border-green-600">
               <h3 className="text-xl font-bold text-white text-center">
-                Reveal this card?
+                {t("revealThisCard")}
               </h3>
               <p className="mt-2 text-sm text-green-300 text-center">
-                This will use your turn to flip this card face up.
+                {t("revealCardDesc")}
               </p>
               <div className="mt-6 flex gap-3">
                 <button
                   onClick={() => setRevealPosition(null)}
                   className="flex-1 rounded-lg bg-green-800 px-4 py-3 font-semibold text-green-200 transition hover:bg-green-700"
                 >
-                  Cancel
+                  {t("cancel")}
                 </button>
                 <button
                   onClick={() => {
@@ -453,7 +455,7 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
                   disabled={isPending}
                   className="flex-1 rounded-lg bg-green-500 px-4 py-3 font-semibold text-white transition hover:bg-green-400 disabled:opacity-50"
                 >
-                  Reveal
+                  {t("reveal")}
                 </button>
               </div>
             </div>

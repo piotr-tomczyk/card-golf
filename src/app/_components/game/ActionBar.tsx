@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 export type TurnState =
   | "idle" // Start of turn, can draw/take from discard/reveal a face-down card
   | "holding_drawn_card" // Drew from deck, need to place or discard
@@ -16,10 +18,12 @@ export function ActionBar({
   turnState,
   isYourTurn,
 }: ActionBarProps) {
+  const t = useTranslations("ActionBar");
+
   if (!isYourTurn) {
     return (
       <p className="text-sm text-green-300 text-center">
-        Waiting for opponent...
+        {t("waitingForOpponent")}
       </p>
     );
   }
@@ -27,7 +31,7 @@ export function ActionBar({
   if (turnState === "idle") {
     return (
       <p className="text-xs text-green-300 text-center">
-        Tap deck to draw &middot; Tap discard to take &middot; Tap face-down card to reveal
+        {t("idleHint")}
       </p>
     );
   }
@@ -35,7 +39,7 @@ export function ActionBar({
   if (turnState === "holding_drawn_card") {
     return (
       <p className="text-sm text-yellow-200 text-center">
-        Drag or tap a hand position to replace, or discard
+        {t("holdingDrawnCard")}
       </p>
     );
   }
@@ -43,7 +47,7 @@ export function ActionBar({
   if (turnState === "choosing_replacement") {
     return (
       <p className="text-sm font-semibold text-blue-200 text-center">
-        Tap a card in your hand to replace it
+        {t("choosingReplacement")}
       </p>
     );
   }

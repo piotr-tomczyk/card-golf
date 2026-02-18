@@ -2,6 +2,7 @@
 
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
+import { useTranslations } from "next-intl";
 import { Card } from "./Card";
 import type { Card as CardType } from "@/server/game/types";
 
@@ -34,9 +35,11 @@ function DraggableCard({ card }: { card: CardType }) {
 function DiscardDropZone({
   onDiscard,
   disabled,
+  label,
 }: {
   onDiscard: () => void;
   disabled: boolean;
+  label: string;
 }) {
   const { isOver, setNodeRef } = useDroppable({
     id: "discard-zone",
@@ -58,7 +61,7 @@ function DiscardDropZone({
           disabled:opacity-50 disabled:cursor-not-allowed
         `}
       >
-        Discard
+        {label}
       </button>
     </div>
   );
@@ -69,14 +72,16 @@ export function DrawnCardInline({
   onDiscard,
   disabled = false,
 }: DrawnCardInlineProps) {
+  const t = useTranslations("DrawnCard");
+
   return (
     <div className="rounded-lg bg-yellow-900/30 border-2 border-yellow-600/50 p-6">
       <p className="text-center text-sm font-semibold text-yellow-200 mb-4">
-        You drew — drag to a hand position or discard
+        {t("youDrew")}
       </p>
       <div className="flex items-center justify-center gap-6">
         <DraggableCard card={card} />
-        <DiscardDropZone onDiscard={onDiscard} disabled={disabled} />
+        <DiscardDropZone onDiscard={onDiscard} disabled={disabled} label={t("discard")} />
       </div>
     </div>
   );

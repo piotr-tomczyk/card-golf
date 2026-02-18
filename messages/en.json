@@ -1,0 +1,151 @@
+{
+  "Home": {
+    "title": "Card Golf",
+    "subtitle": "A fun multiplayer card game",
+    "guestNote": "Playing as a guest? Your name will be stored locally.",
+    "signIn": "Sign in with Discord",
+    "saveStats": "to save your stats"
+  },
+  "LobbyActions": {
+    "whatsYourName": "What's your name?",
+    "enterDisplayName": "Enter a display name to get started",
+    "yourNamePlaceholder": "Your name",
+    "continue": "Continue",
+    "createNewGame": "Create New Game",
+    "rounds": "Rounds",
+    "fewerRounds": "Fewer rounds",
+    "moreRounds": "More rounds",
+    "creating": "Creating...",
+    "createGame": "Create Game",
+    "joinGame": "Join Game",
+    "enterCode": "Enter 6-character code",
+    "joining": "Joining...",
+    "join": "Join Game",
+    "playingAs": "Playing as {name}",
+    "playingAsGuest": "Playing as {name} (guest)",
+    "changeName": "Change name"
+  },
+  "GameBoard": {
+    "whatsYourName": "What's your name?",
+    "enterDisplayName": "Enter a display name to join the game",
+    "yourNamePlaceholder": "Your name",
+    "continue": "Continue",
+    "joiningGame": "Joining game...",
+    "loadingGame": "Loading game...",
+    "gameNotFound": "Game Not Found",
+    "gameNotFoundDesc": "The game you're looking for doesn't exist or has ended.",
+    "backToHome": "Back to Home",
+    "gameAbandoned": "Game Abandoned",
+    "gameAbandonedDesc": "This game was abandoned by the players.",
+    "unknownStatus": "Unknown game status: {status}"
+  },
+  "GameLobby": {
+    "gameLobby": "Game Lobby",
+    "waitingForPlayers": "Waiting for players to join...",
+    "gameCode": "Game Code",
+    "copied": "Copied!",
+    "copyShareLink": "Copy Share Link",
+    "linkCopied": "Link Copied!",
+    "players": "Players",
+    "guest": "Guest",
+    "host": "HOST",
+    "waitingForPlayer": "Waiting for player...",
+    "gameStarting": "Game is starting...",
+    "shareInstructions": "Share the game code or link with your friends",
+    "autoStart": "The game will start automatically when all players join"
+  },
+  "SetupPhase": {
+    "setupPhase": "Setup Phase",
+    "round": "Round {n}",
+    "choose2Cards": "Choose 2 cards to reveal",
+    "clickTwoCards": "Click on two face-down cards in your hand, then click Confirm",
+    "waitingForOpponent": "Waiting for opponent...",
+    "opponentChoosing": "{name} is choosing their cards",
+    "allPlayersReady": "All players ready!",
+    "startingGame": "Starting game...",
+    "confirmSelection": "Confirm Selection ({count}/2)",
+    "confirming": "Confirming...",
+    "ready": "✓ Ready",
+    "choosing": "Choosing...",
+    "youLabel": "You",
+    "unableToIdentify": "Unable to identify player"
+  },
+  "PlayingPhase": {
+    "unableToIdentify": "Unable to identify players",
+    "yourHand": "Your Hand ({pts} pts)",
+    "opponentHand": "{name} ({pts} pts)",
+    "revealThisCard": "Reveal this card?",
+    "revealCardDesc": "This will use your turn to flip this card face up.",
+    "cancel": "Cancel",
+    "reveal": "Reveal"
+  },
+  "ActionBar": {
+    "waitingForOpponent": "Waiting for opponent...",
+    "idleHint": "Tap deck to draw · Tap discard to take · Tap face-down card to reveal",
+    "holdingDrawnCard": "Drag or tap a hand position to replace, or discard",
+    "choosingReplacement": "Tap a card in your hand to replace it"
+  },
+  "DrawnCard": {
+    "youDrew": "You drew — drag to a hand position or discard",
+    "discard": "Discard"
+  },
+  "TurnIndicator": {
+    "finalTurnLabel": "⚑ Final Turn ⚑",
+    "yourTurnFinal": "Your Turn — make it count!",
+    "opponentTurnFinal": "{name}'s Turn",
+    "roundTurnCounter": "Round {current}/{total} · Turn {turn}",
+    "yourTurn": "Your Turn",
+    "opponentTurn": "{name}'s Turn"
+  },
+  "ScoreBoard": {
+    "totalScores": "Total Scores",
+    "round": "Round",
+    "total": "Total",
+    "noRoundsYet": "No completed rounds yet",
+    "currentlyPlayingRound": "Currently playing Round {current} of {total}"
+  },
+  "ScoreStrip": {
+    "you": "You"
+  },
+  "RoundEndScreen": {
+    "roundOf": "Round {current} of {total}",
+    "cardsDown": "Cards Down",
+    "thisRound": "this round",
+    "roundResult": "Round Result",
+    "roundWinner": "Round Winner",
+    "tied": "{names} tied!",
+    "winsRound": "{name} wins this round",
+    "calculatingScores": "Calculating scores…",
+    "total": "total",
+    "roundsComplete": "{current} of {total} rounds complete",
+    "starting": "Starting…",
+    "nextRound": "Next Round →",
+    "viewFinalResults": "View Final Results →"
+  },
+  "Piles": {
+    "draw": "Draw",
+    "cardCount": "{count, plural, one {# card} other {# cards}}",
+    "discard": "Discard",
+    "empty": "Empty",
+    "noCards": "No cards",
+    "tapToTake": "Tap to take"
+  },
+  "GameOverScreen": {
+    "itsADraw": "It's a Draw!",
+    "wins": "{name} Wins!",
+    "drawDesc": "{names} tied with {score} points",
+    "finalScore": "Final Score: {score} points",
+    "finalStandings": "Final Standings",
+    "guest": "Guest",
+    "points": "points",
+    "roundByRound": "Round-by-Round Scores",
+    "round": "Round",
+    "total": "Total",
+    "gameStats": "Game Stats",
+    "roundsPlayed": "Rounds Played",
+    "totalTurns": "Total Turns",
+    "playAgain": "Play Again",
+    "backToHome": "Back to Home",
+    "thanksForPlaying": "Thanks for playing Card Golf!"
+  }
+}

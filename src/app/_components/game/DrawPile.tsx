@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Card } from "./Card";
 
 interface DrawPileProps {
@@ -21,6 +22,8 @@ const stackSizes = {
 };
 
 export function DrawPile({ count, selectable, onClick, size = "lg" }: DrawPileProps) {
+  const t = useTranslations("Piles");
+
   return (
     <div className="flex flex-col items-center gap-1">
       <div className="relative">
@@ -46,9 +49,9 @@ export function DrawPile({ count, selectable, onClick, size = "lg" }: DrawPilePr
         )}
       </div>
       <div className="text-center">
-        <p className="text-xs font-semibold text-white">Draw</p>
+        <p className="text-xs font-semibold text-white">{t("draw")}</p>
         <p className="text-xs text-green-300">
-          {count} card{count !== 1 ? "s" : ""}
+          {t("cardCount", { count })}
         </p>
       </div>
     </div>

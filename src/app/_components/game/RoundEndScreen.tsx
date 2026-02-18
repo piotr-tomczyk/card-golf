@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Card } from "./Card";
 import { api, type RouterOutputs } from "@/trpc/react";
 import type { Card as CardType } from "@/server/game/types";
@@ -68,6 +69,7 @@ function RevealGrid({
 }
 
 export function RoundEndScreen({ game, refetch }: RoundEndScreenProps) {
+  const t = useTranslations("RoundEndScreen");
   const [showScores, setShowScores] = useState(false);
   const [showWinner, setShowWinner] = useState(false);
   const [showButton, setShowButton] = useState(false);
@@ -164,10 +166,10 @@ export function RoundEndScreen({ game, refetch }: RoundEndScreenProps) {
           style={{ animation: "slideDown 0.5s ease both" }}
         >
           <p className="text-xs font-bold uppercase tracking-[0.3em] text-green-400">
-            Round {game.currentRound} of {game.config.totalRounds}
+            {t("roundOf", { current: game.currentRound, total: game.config.totalRounds })}
           </p>
           <h1 className="mt-1 text-4xl font-black uppercase tracking-tight text-white sm:text-5xl">
-            Cards Down
+            {t("cardsDown")}
           </h1>
           <div className="mx-auto mt-2 h-0.5 w-16 rounded-full bg-green-500/50" />
         </div>
@@ -229,7 +231,7 @@ export function RoundEndScreen({ game, refetch }: RoundEndScreenProps) {
                     >
                       {roundScore?.score ?? 0}
                     </span>
-                    <p className="text-xs text-green-400">this round</p>
+                    <p className="text-xs text-green-400">{t("thisRound")}</p>
                   </div>
                 </div>
 
@@ -260,16 +262,16 @@ export function RoundEndScreen({ game, refetch }: RoundEndScreenProps) {
           {roundWinnerPlayers.length > 0 ? (
             <>
               <p className="text-xs font-bold uppercase tracking-[0.25em] text-green-400">
-                {isRoundDraw ? "Round Result" : "Round Winner"}
+                {isRoundDraw ? t("roundResult") : t("roundWinner")}
               </p>
               <p className="mt-1 text-2xl font-black text-white">
                 {isRoundDraw
-                  ? `${roundWinnerPlayers.map((p) => p.displayName).join(" & ")} tied!`
-                  : `${roundWinnerPlayers[0]!.displayName} wins this round`}
+                  ? t("tied", { names: roundWinnerPlayers.map((p) => p.displayName).join(" & ") })
+                  : t("winsRound", { name: roundWinnerPlayers[0]!.displayName })}
               </p>
             </>
           ) : (
-            <p className="text-green-400">Calculating scores…</p>
+            <p className="text-green-400">{t("calculatingScores")}</p>
           )}
 
           {/* Running totals */}
@@ -283,12 +285,12 @@ export function RoundEndScreen({ game, refetch }: RoundEndScreenProps) {
                   <p className="text-xl font-black tabular-nums text-white">
                     {player.totalScore}
                   </p>
-                  <p className="text-[10px] text-green-500">total</p>
+                  <p className="text-[10px] text-green-500">{t("total")}</p>
                 </div>
               ))}
           </div>
           <p className="mt-2 text-xs text-green-600">
-            {game.currentRound} of {game.config.totalRounds} rounds complete
+            {t("roundsComplete", { current: game.currentRound, total: game.config.totalRounds })}
           </p>
         </div>
 
@@ -306,10 +308,10 @@ export function RoundEndScreen({ game, refetch }: RoundEndScreenProps) {
             className="rounded-xl bg-green-600 px-10 py-4 text-lg font-bold uppercase tracking-wide text-white shadow-lg shadow-green-900/50 transition hover:bg-green-500 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {startNextRound.isPending
-              ? "Starting…"
+              ? t("starting")
               : game.currentRound < game.config.totalRounds
-                ? "Next Round →"
-                : "View Final Results →"}
+                ? t("nextRound")
+                : t("viewFinalResults")}
           </button>
         </div>
 

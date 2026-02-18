@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { api } from "@/trpc/react";
 import type { Session } from "next-auth";
 
@@ -10,6 +11,7 @@ interface GameLobbyActionsProps {
 }
 
 export function GameLobbyActions({ session }: GameLobbyActionsProps) {
+  const t = useTranslations("LobbyActions");
   const router = useRouter();
   const [joinCode, setJoinCode] = useState("");
   const [guestName, setGuestName] = useState("");
@@ -133,17 +135,17 @@ export function GameLobbyActions({ session }: GameLobbyActionsProps) {
       <div className="w-full max-w-md space-y-4">
         <div className="rounded-lg bg-green-900/50 p-6 space-y-4">
           <h2 className="text-2xl font-bold text-center">
-            What's your name?
+            {t("whatsYourName")}
           </h2>
           <p className="text-sm text-green-200 text-center">
-            Enter a display name to get started
+            {t("enterDisplayName")}
           </p>
           <input
             type="text"
             value={guestName}
             onChange={(e) => setGuestName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && saveGuestName()}
-            placeholder="Your name"
+            placeholder={t("yourNamePlaceholder")}
             maxLength={30}
             className="w-full rounded-lg bg-green-950 px-4 py-3 text-white placeholder-green-400 outline-none focus:ring-2 focus:ring-green-500"
             autoFocus
@@ -153,7 +155,7 @@ export function GameLobbyActions({ session }: GameLobbyActionsProps) {
             disabled={!guestName.trim()}
             className="w-full rounded-lg bg-green-600 px-6 py-3 font-semibold text-white transition hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Continue
+            {t("continue")}
           </button>
         </div>
       </div>
@@ -164,16 +166,16 @@ export function GameLobbyActions({ session }: GameLobbyActionsProps) {
     <div className="w-full max-w-md space-y-6">
       {/* Create Game */}
       <div className="rounded-lg bg-green-900/50 p-6 space-y-4">
-        <h2 className="text-2xl font-bold text-center">Create New Game</h2>
+        <h2 className="text-2xl font-bold text-center">{t("createNewGame")}</h2>
 
         {/* Rounds picker */}
         <div className="flex items-center justify-between rounded-lg bg-green-950/50 px-4 py-3">
-          <span className="text-green-200 font-medium">Rounds</span>
+          <span className="text-green-200 font-medium">{t("rounds")}</span>
           <div className="flex items-center gap-3">
             <button
               onClick={() => setTotalRounds((r) => Math.max(1, r - 1))}
               className="flex h-8 w-8 items-center justify-center rounded-full bg-green-700 text-xl font-bold leading-none hover:bg-green-600 transition"
-              aria-label="Fewer rounds"
+              aria-label={t("fewerRounds")}
             >
               −
             </button>
@@ -181,7 +183,7 @@ export function GameLobbyActions({ session }: GameLobbyActionsProps) {
             <button
               onClick={() => setTotalRounds((r) => Math.min(18, r + 1))}
               className="flex h-8 w-8 items-center justify-center rounded-full bg-green-700 text-xl font-bold leading-none hover:bg-green-600 transition"
-              aria-label="More rounds"
+              aria-label={t("moreRounds")}
             >
               +
             </button>
@@ -193,7 +195,7 @@ export function GameLobbyActions({ session }: GameLobbyActionsProps) {
           disabled={createGame.isPending}
           className="w-full rounded-lg bg-green-600 px-6 py-4 text-xl font-semibold text-white transition hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {createGame.isPending ? "Creating..." : "Create Game"}
+          {createGame.isPending ? t("creating") : t("createGame")}
         </button>
         {createGame.error && (
           <p className="text-sm text-red-400 text-center">
@@ -204,13 +206,13 @@ export function GameLobbyActions({ session }: GameLobbyActionsProps) {
 
       {/* Join Game */}
       <div className="rounded-lg bg-green-900/50 p-6 space-y-4">
-        <h2 className="text-2xl font-bold text-center">Join Game</h2>
+        <h2 className="text-2xl font-bold text-center">{t("joinGame")}</h2>
         <input
           type="text"
           value={joinCode}
           onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
           onKeyDown={(e) => e.key === "Enter" && handleJoinGame()}
-          placeholder="Enter 6-character code"
+          placeholder={t("enterCode")}
           maxLength={6}
           className="w-full rounded-lg bg-green-950 px-4 py-3 text-center text-2xl font-mono uppercase tracking-widest text-white placeholder-green-400 outline-none focus:ring-2 focus:ring-green-500"
         />
@@ -219,7 +221,7 @@ export function GameLobbyActions({ session }: GameLobbyActionsProps) {
           disabled={joinGame.isPending || joinCode.length !== 6}
           className="w-full rounded-lg bg-blue-600 px-6 py-4 text-xl font-semibold text-white transition hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {joinGame.isPending ? "Joining..." : "Join Game"}
+          {joinGame.isPending ? t("joining") : t("join")}
         </button>
         {joinGame.error && (
           <p className="text-sm text-red-400 text-center">
@@ -231,10 +233,10 @@ export function GameLobbyActions({ session }: GameLobbyActionsProps) {
       {/* Show current user */}
       <div className="text-center text-sm text-green-300">
         {session?.user ? (
-          <p>Playing as {session.user.name}</p>
+          <p>{t("playingAs", { name: session.user.name ?? "" })}</p>
         ) : guestName ? (
           <p>
-            Playing as {guestName} (guest) •{" "}
+            {t("playingAsGuest", { name: guestName })} •{" "}
             <button
               onClick={() => {
                 setGuestName("");
@@ -242,7 +244,7 @@ export function GameLobbyActions({ session }: GameLobbyActionsProps) {
               }}
               className="underline hover:text-white"
             >
-              Change name
+              {t("changeName")}
             </button>
           </p>
         ) : null}

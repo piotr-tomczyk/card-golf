@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { api, type RouterOutputs } from "@/trpc/react";
 
 type GameState = RouterOutputs["game"]["getByCode"];
@@ -10,6 +11,7 @@ interface GameOverScreenProps {
 }
 
 export function GameOverScreen({ game }: GameOverScreenProps) {
+  const t = useTranslations("GameOverScreen");
   const router = useRouter();
 
   const { data: roundScores } = api.game.getRoundScores.useQuery({
@@ -39,19 +41,19 @@ export function GameOverScreen({ game }: GameOverScreenProps) {
           </h1>
           <h2 className="text-5xl font-extrabold tracking-tight sm:text-6xl text-yellow-400">
             {isDraw
-              ? "It's a Draw!"
-              : `${winners[0]!.displayName} Wins!`}
+              ? t("itsADraw")
+              : t("wins", { name: winners[0]!.displayName })}
           </h2>
           <p className="text-2xl text-green-200">
             {isDraw
-              ? `${winners.map((w) => w.displayName).join(" & ")} tied with ${lowestScore} points`
-              : `Final Score: ${lowestScore} points`}
+              ? t("drawDesc", { names: winners.map((w) => w.displayName).join(" & "), score: lowestScore })
+              : t("finalScore", { score: lowestScore })}
           </p>
         </div>
 
         {/* Final Standings */}
         <div className="rounded-lg bg-green-900/50 p-6">
-          <h3 className="text-2xl font-bold text-center mb-6">Final Standings</h3>
+          <h3 className="text-2xl font-bold text-center mb-6">{t("finalStandings")}</h3>
           <div className="space-y-3">
             {game.players
               .sort((a, b) => a.totalScore - b.totalScore)
@@ -74,7 +76,7 @@ export function GameOverScreen({ game }: GameOverScreenProps) {
                     <div>
                       <p className="text-xl font-bold">{player.displayName}</p>
                       {player.isGuest && (
-                        <p className="text-sm text-green-400">Guest</p>
+                        <p className="text-sm text-green-400">{t("guest")}</p>
                       )}
                     </div>
                   </div>
@@ -82,7 +84,7 @@ export function GameOverScreen({ game }: GameOverScreenProps) {
                     <p className="text-3xl font-bold text-white">
                       {player.totalScore}
                     </p>
-                    <p className="text-sm text-green-300">points</p>
+                    <p className="text-sm text-green-300">{t("points")}</p>
                   </div>
                 </div>
                 );
@@ -94,13 +96,13 @@ export function GameOverScreen({ game }: GameOverScreenProps) {
         {roundScores && roundScores.length > 0 && (
           <div className="rounded-lg bg-green-900/50 p-6">
             <h3 className="text-xl font-bold text-center mb-4">
-              Round-by-Round Scores
+              {t("roundByRound")}
             </h3>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-green-700">
-                    <th className="text-left py-2 px-3 text-green-300">Round</th>
+                    <th className="text-left py-2 px-3 text-green-300">{t("round")}</th>
                     {game.players.map((player) => (
                       <th
                         key={player.id}
@@ -144,7 +146,7 @@ export function GameOverScreen({ game }: GameOverScreenProps) {
                     );
                   })}
                   <tr className="border-t-2 border-green-600 font-bold">
-                    <td className="py-2 px-3 text-green-200">Total</td>
+                    <td className="py-2 px-3 text-green-200">{t("total")}</td>
                     {game.players.map((player) => (
                       <td
                         key={player.id}
@@ -162,17 +164,17 @@ export function GameOverScreen({ game }: GameOverScreenProps) {
 
         {/* Game Stats */}
         <div className="rounded-lg bg-green-900/50 p-6">
-          <h3 className="text-xl font-bold text-center mb-4">Game Stats</h3>
+          <h3 className="text-xl font-bold text-center mb-4">{t("gameStats")}</h3>
           <div className="grid grid-cols-2 gap-4 text-center">
             <div>
               <p className="text-3xl font-bold text-white">
                 {game.config.totalRounds}
               </p>
-              <p className="text-sm text-green-300">Rounds Played</p>
+              <p className="text-sm text-green-300">{t("roundsPlayed")}</p>
             </div>
             <div>
               <p className="text-3xl font-bold text-white">{game.turnNumber}</p>
-              <p className="text-sm text-green-300">Total Turns</p>
+              <p className="text-sm text-green-300">{t("totalTurns")}</p>
             </div>
           </div>
         </div>
@@ -183,19 +185,19 @@ export function GameOverScreen({ game }: GameOverScreenProps) {
             onClick={handlePlayAgain}
             className="rounded-lg bg-green-600 px-8 py-4 text-xl font-semibold text-white transition hover:bg-green-500"
           >
-            Play Again
+            {t("playAgain")}
           </button>
           <button
             onClick={handleBackHome}
             className="rounded-lg bg-green-800 px-8 py-4 text-xl font-semibold text-white transition hover:bg-green-700"
           >
-            Back to Home
+            {t("backToHome")}
           </button>
         </div>
 
         {/* Thank You Message */}
         <div className="text-center text-sm text-green-400">
-          <p>Thanks for playing Card Golf!</p>
+          <p>{t("thanksForPlaying")}</p>
         </div>
       </div>
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import type { RouterOutputs } from "@/trpc/react";
 
 type GameState = RouterOutputs["game"]["getByCode"];
@@ -10,6 +11,7 @@ interface GameLobbyProps {
 }
 
 export function GameLobby({ game }: GameLobbyProps) {
+  const t = useTranslations("GameLobby");
   const [copied, setCopied] = useState(false);
 
   const shareUrl = typeof window !== "undefined"
@@ -46,17 +48,17 @@ export function GameLobby({ game }: GameLobbyProps) {
         {/* Header */}
         <div className="text-center">
           <h1 className="text-5xl font-extrabold tracking-tight sm:text-6xl mb-4">
-            Game Lobby
+            {t("gameLobby")}
           </h1>
           <p className="text-xl text-green-200">
-            Waiting for players to join...
+            {t("waitingForPlayers")}
           </p>
         </div>
 
         {/* Game Code */}
         <div className="rounded-lg bg-green-900/50 p-4 sm:p-8 space-y-4">
           <div className="text-center">
-            <p className="text-sm text-green-300 mb-2">Game Code</p>
+            <p className="text-sm text-green-300 mb-2">{t("gameCode")}</p>
             <button
               onClick={copyCode}
               className="text-4xl sm:text-6xl font-mono font-bold tracking-widest hover:text-green-300 transition break-all"
@@ -65,7 +67,7 @@ export function GameLobby({ game }: GameLobbyProps) {
               {game.code}
             </button>
             {copied && (
-              <p className="text-sm text-green-400 mt-2">Copied!</p>
+              <p className="text-sm text-green-400 mt-2">{t("copied")}</p>
             )}
           </div>
 
@@ -73,14 +75,14 @@ export function GameLobby({ game }: GameLobbyProps) {
             onClick={copyToClipboard}
             className="w-full rounded-lg bg-green-700 px-6 py-3 font-semibold text-white transition hover:bg-green-600"
           >
-            {copied ? "Link Copied!" : "Copy Share Link"}
+            {copied ? t("linkCopied") : t("copyShareLink")}
           </button>
         </div>
 
         {/* Players List */}
         <div className="rounded-lg bg-green-900/50 p-6 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold">Players</h2>
+            <h2 className="text-2xl font-bold">{t("players")}</h2>
             <span className={`text-lg font-semibold ${isFull ? "text-green-400" : "text-green-300"}`}>
               {currentPlayers} / {maxPlayers}
             </span>
@@ -99,13 +101,13 @@ export function GameLobby({ game }: GameLobbyProps) {
                   <div>
                     <p className="font-semibold">{player.displayName}</p>
                     {player.isGuest && (
-                      <p className="text-xs text-green-400">Guest</p>
+                      <p className="text-xs text-green-400">{t("guest")}</p>
                     )}
                   </div>
                 </div>
                 {index === 0 && (
                   <span className="rounded-full bg-yellow-600 px-3 py-1 text-xs font-semibold">
-                    HOST
+                    {t("host")}
                   </span>
                 )}
               </div>
@@ -120,7 +122,7 @@ export function GameLobby({ game }: GameLobbyProps) {
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-800">
                   ?
                 </div>
-                <p className="text-green-300">Waiting for player...</p>
+                <p className="text-green-300">{t("waitingForPlayer")}</p>
               </div>
             ))}
           </div>
@@ -129,14 +131,14 @@ export function GameLobby({ game }: GameLobbyProps) {
         {/* Status Message */}
         {isFull && (
           <div className="rounded-lg bg-green-600 p-4 text-center font-semibold">
-            Game is starting...
+            {t("gameStarting")}
           </div>
         )}
 
         {!isFull && (
           <div className="text-center text-sm text-green-300">
-            <p>Share the game code or link with your friends</p>
-            <p className="mt-1">The game will start automatically when all players join</p>
+            <p>{t("shareInstructions")}</p>
+            <p className="mt-1">{t("autoStart")}</p>
           </div>
         )}
       </div>

@@ -1,0 +1,151 @@
+{
+  "Home": {
+    "title": "Card Golf",
+    "subtitle": "Zabawna gra karciana dla wielu graczy",
+    "guestNote": "Grasz jako gość? Twoje imię zostanie zapisane lokalnie.",
+    "signIn": "Zaloguj się przez Discord",
+    "saveStats": "aby zapisywać statystyki"
+  },
+  "LobbyActions": {
+    "whatsYourName": "Jak masz na imię?",
+    "enterDisplayName": "Podaj wyświetlaną nazwę, aby zacząć",
+    "yourNamePlaceholder": "Twoje imię",
+    "continue": "Dalej",
+    "createNewGame": "Utwórz nową grę",
+    "rounds": "Rundy",
+    "fewerRounds": "Mniej rund",
+    "moreRounds": "Więcej rund",
+    "creating": "Tworzenie...",
+    "createGame": "Utwórz grę",
+    "joinGame": "Dołącz do gry",
+    "enterCode": "Podaj 6-znakowy kod",
+    "joining": "Dołączanie...",
+    "join": "Dołącz",
+    "playingAs": "Grasz jako {name}",
+    "playingAsGuest": "Grasz jako {name} (gość)",
+    "changeName": "Zmień imię"
+  },
+  "GameBoard": {
+    "whatsYourName": "Jak masz na imię?",
+    "enterDisplayName": "Podaj wyświetlaną nazwę, aby dołączyć do gry",
+    "yourNamePlaceholder": "Twoje imię",
+    "continue": "Dalej",
+    "joiningGame": "Dołączanie do gry...",
+    "loadingGame": "Ładowanie gry...",
+    "gameNotFound": "Gra nie znaleziona",
+    "gameNotFoundDesc": "Szukana gra nie istnieje lub się zakończyła.",
+    "backToHome": "Powrót do strony głównej",
+    "gameAbandoned": "Gra porzucona",
+    "gameAbandonedDesc": "Ta gra została porzucona przez graczy.",
+    "unknownStatus": "Nieznany status gry: {status}"
+  },
+  "GameLobby": {
+    "gameLobby": "Lobby gry",
+    "waitingForPlayers": "Oczekiwanie na graczy...",
+    "gameCode": "Kod gry",
+    "copied": "Skopiowano!",
+    "copyShareLink": "Kopiuj link",
+    "linkCopied": "Link skopiowany!",
+    "players": "Gracze",
+    "guest": "Gość",
+    "host": "GOSPODARZ",
+    "waitingForPlayer": "Oczekiwanie na gracza...",
+    "gameStarting": "Gra rozpoczyna się...",
+    "shareInstructions": "Udostępnij kod gry lub link znajomym",
+    "autoStart": "Gra rozpocznie się automatycznie, gdy wszyscy gracze dołączą"
+  },
+  "SetupPhase": {
+    "setupPhase": "Faza konfiguracji",
+    "round": "Runda {n}",
+    "choose2Cards": "Wybierz 2 karty do odkrycia",
+    "clickTwoCards": "Kliknij dwie zakryte karty na swojej ręce, a następnie kliknij Potwierdź",
+    "waitingForOpponent": "Oczekiwanie na przeciwnika...",
+    "opponentChoosing": "{name} wybiera swoje karty",
+    "allPlayersReady": "Wszyscy gracze gotowi!",
+    "startingGame": "Rozpoczynanie gry...",
+    "confirmSelection": "Potwierdź wybór ({count}/2)",
+    "confirming": "Potwierdzanie...",
+    "ready": "✓ Gotowy",
+    "choosing": "Wybierasz...",
+    "youLabel": "Ty",
+    "unableToIdentify": "Nie można zidentyfikować gracza"
+  },
+  "PlayingPhase": {
+    "unableToIdentify": "Nie można zidentyfikować graczy",
+    "yourHand": "Twoja ręka ({pts} pkt)",
+    "opponentHand": "{name} ({pts} pkt)",
+    "revealThisCard": "Odkryć tę kartę?",
+    "revealCardDesc": "Spowoduje to wykorzystanie twojej tury do odkrycia tej karty.",
+    "cancel": "Anuluj",
+    "reveal": "Odkryj"
+  },
+  "ActionBar": {
+    "waitingForOpponent": "Oczekiwanie na przeciwnika...",
+    "idleHint": "Dotknij talii, aby dobrać · Dotknij stosu odrzutów, aby wziąć · Dotknij zakrytej karty, aby odkryć",
+    "holdingDrawnCard": "Przeciągnij lub dotknij pozycję w ręce, aby zastąpić, lub odrzuć",
+    "choosingReplacement": "Dotknij kartę na swojej ręce, aby ją zastąpić"
+  },
+  "DrawnCard": {
+    "youDrew": "Dobrałeś — przeciągnij na pozycję w ręce lub odrzuć",
+    "discard": "Odrzuć"
+  },
+  "TurnIndicator": {
+    "finalTurnLabel": "⚑ Ostatnia tura ⚑",
+    "yourTurnFinal": "Twoja tura — zrób coś dobrego!",
+    "opponentTurnFinal": "Tura {name}",
+    "roundTurnCounter": "Runda {current}/{total} · Tura {turn}",
+    "yourTurn": "Twoja tura",
+    "opponentTurn": "Tura {name}"
+  },
+  "ScoreBoard": {
+    "totalScores": "Wyniki całkowite",
+    "round": "Runda",
+    "total": "Razem",
+    "noRoundsYet": "Brak ukończonych rund",
+    "currentlyPlayingRound": "Aktualnie rozgrywana runda {current} z {total}"
+  },
+  "ScoreStrip": {
+    "you": "Ty"
+  },
+  "RoundEndScreen": {
+    "roundOf": "Runda {current} z {total}",
+    "cardsDown": "Karty odkryte",
+    "thisRound": "ta runda",
+    "roundResult": "Wynik rundy",
+    "roundWinner": "Zwycięzca rundy",
+    "tied": "{names} zremisowali!",
+    "winsRound": "{name} wygrywa tę rundę",
+    "calculatingScores": "Obliczanie wyników…",
+    "total": "razem",
+    "roundsComplete": "{current} z {total} rund ukończonych",
+    "starting": "Rozpoczynanie…",
+    "nextRound": "Następna runda →",
+    "viewFinalResults": "Zobacz wyniki końcowe →"
+  },
+  "Piles": {
+    "draw": "Talia",
+    "cardCount": "{count, plural, one {# karta} few {# karty} many {# kart} other {# kart}}",
+    "discard": "Odrzucone",
+    "empty": "Puste",
+    "noCards": "Brak kart",
+    "tapToTake": "Dotknij, aby wziąć"
+  },
+  "GameOverScreen": {
+    "itsADraw": "Remis!",
+    "wins": "{name} wygrywa!",
+    "drawDesc": "{names} zremisowali z {score} punktami",
+    "finalScore": "Wynik końcowy: {score} punktów",
+    "finalStandings": "Klasyfikacja końcowa",
+    "guest": "Gość",
+    "points": "punkty",
+    "roundByRound": "Wyniki runda po rundzie",
+    "round": "Runda",
+    "total": "Razem",
+    "gameStats": "Statystyki gry",
+    "roundsPlayed": "Rozegranych rund",
+    "totalTurns": "Łącznie tur",
+    "playAgain": "Zagraj ponownie",
+    "backToHome": "Powrót do strony głównej",
+    "thanksForPlaying": "Dziękujemy za grę w Card Golf!"
+  }
+}

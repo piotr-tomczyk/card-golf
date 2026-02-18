@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { api, type RouterOutputs } from "@/trpc/react";
 
 type GameState = RouterOutputs["game"]["getByCode"];
@@ -10,6 +11,7 @@ interface ScoreBoardProps {
 }
 
 export function ScoreBoard({ game }: ScoreBoardProps) {
+  const t = useTranslations("ScoreBoard");
   const [isExpanded, setIsExpanded] = useState(false);
 
   const { data: roundScores } = api.game.getRoundScores.useQuery(
@@ -25,7 +27,7 @@ export function ScoreBoard({ game }: ScoreBoardProps) {
         className="w-full p-4 text-left hover:bg-green-800/50 transition"
       >
         <div className="flex items-center justify-between">
-          <h3 className="text-xl font-bold text-white">Total Scores</h3>
+          <h3 className="text-xl font-bold text-white">{t("totalScores")}</h3>
           <div className="flex items-center gap-4">
             <div className="text-right">
               {game.players.map((player) => (
@@ -50,7 +52,7 @@ export function ScoreBoard({ game }: ScoreBoardProps) {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-green-700">
-                    <th className="text-left py-2 px-3 text-green-300">Round</th>
+                    <th className="text-left py-2 px-3 text-green-300">{t("round")}</th>
                     {game.players.map((player) => (
                       <th
                         key={player.id}
@@ -94,7 +96,7 @@ export function ScoreBoard({ game }: ScoreBoardProps) {
                     );
                   })}
                   <tr className="border-t-2 border-green-600 font-bold">
-                    <td className="py-2 px-3 text-green-200">Total</td>
+                    <td className="py-2 px-3 text-green-200">{t("total")}</td>
                     {game.players.map((player) => (
                       <td
                         key={player.id}
@@ -109,13 +111,13 @@ export function ScoreBoard({ game }: ScoreBoardProps) {
             </div>
           ) : (
             <p className="text-center text-green-300 text-sm">
-              No completed rounds yet
+              {t("noRoundsYet")}
             </p>
           )}
 
           {/* Current Round Indicator */}
           <div className="text-center text-xs text-green-400">
-            Currently playing Round {game.currentRound} of {game.config.totalRounds}
+            {t("currentlyPlayingRound", { current: game.currentRound, total: game.config.totalRounds })}
           </div>
         </div>
       )}

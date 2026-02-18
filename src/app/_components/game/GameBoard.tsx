@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { api, type RouterOutputs } from "@/trpc/react";
 import { GameLobby } from "./GameLobby";
 import { SetupPhase } from "./SetupPhase";
@@ -16,6 +17,7 @@ interface GameBoardProps {
 }
 
 export function GameBoard({ code, userId, initialGame }: GameBoardProps) {
+  const t = useTranslations("GameBoard");
   const router = useRouter();
   const hasAttemptedJoin = useRef(false);
   const [needsGuestName, setNeedsGuestName] = useState(false);
@@ -138,17 +140,17 @@ export function GameBoard({ code, userId, initialGame }: GameBoardProps) {
         <div className="w-full max-w-md space-y-4 px-4">
           <div className="rounded-lg bg-green-900/50 p-6 space-y-4">
             <h2 className="text-2xl font-bold text-center">
-              What&apos;s your name?
+              {t("whatsYourName")}
             </h2>
             <p className="text-sm text-green-200 text-center">
-              Enter a display name to join the game
+              {t("enterDisplayName")}
             </p>
             <input
               type="text"
               value={guestNameInput}
               onChange={(e) => setGuestNameInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleGuestNameSubmit()}
-              placeholder="Your name"
+              placeholder={t("yourNamePlaceholder")}
               maxLength={30}
               className="w-full rounded-lg bg-green-950 px-4 py-3 text-white placeholder-green-400 outline-none focus:ring-2 focus:ring-green-500"
               autoFocus
@@ -158,7 +160,7 @@ export function GameBoard({ code, userId, initialGame }: GameBoardProps) {
               disabled={!guestNameInput.trim()}
               className="w-full rounded-lg bg-green-600 px-6 py-3 font-semibold text-white transition hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Continue
+              {t("continue")}
             </button>
           </div>
         </div>
@@ -172,7 +174,7 @@ export function GameBoard({ code, userId, initialGame }: GameBoardProps) {
         <div className="text-center">
           <div className="mb-4 h-16 w-16 animate-spin rounded-full border-4 border-green-300 border-t-transparent mx-auto"></div>
           <p className="text-xl">
-            {joinGame.isPending ? "Joining game..." : "Loading game..."}
+            {joinGame.isPending ? t("joiningGame") : t("loadingGame")}
           </p>
         </div>
       </div>
@@ -183,15 +185,15 @@ export function GameBoard({ code, userId, initialGame }: GameBoardProps) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-green-800 to-green-950 text-white">
         <div className="max-w-md text-center space-y-4">
-          <h1 className="text-4xl font-bold text-red-400">Game Not Found</h1>
+          <h1 className="text-4xl font-bold text-red-400">{t("gameNotFound")}</h1>
           <p className="text-lg text-green-200">
-            The game you're looking for doesn't exist or has ended.
+            {t("gameNotFoundDesc")}
           </p>
           <a
             href="/"
             className="inline-block rounded-lg bg-green-600 px-6 py-3 font-semibold text-white transition hover:bg-green-500"
           >
-            Back to Home
+            {t("backToHome")}
           </a>
         </div>
       </div>
@@ -221,16 +223,16 @@ export function GameBoard({ code, userId, initialGame }: GameBoardProps) {
         <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-green-800 to-green-950 text-white">
           <div className="max-w-md text-center space-y-4">
             <h1 className="text-4xl font-bold text-yellow-400">
-              Game Abandoned
+              {t("gameAbandoned")}
             </h1>
             <p className="text-lg text-green-200">
-              This game was abandoned by the players.
+              {t("gameAbandonedDesc")}
             </p>
             <a
               href="/"
               className="inline-block rounded-lg bg-green-600 px-6 py-3 font-semibold text-white transition hover:bg-green-500"
             >
-              Back to Home
+              {t("backToHome")}
             </a>
           </div>
         </div>
@@ -240,7 +242,7 @@ export function GameBoard({ code, userId, initialGame }: GameBoardProps) {
       return (
         <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-green-800 to-green-950 text-white">
           <div className="text-center">
-            <p className="text-xl">Unknown game status: {game.status}</p>
+            <p className="text-xl">{t("unknownStatus", { status: game.status })}</p>
           </div>
         </div>
       );
