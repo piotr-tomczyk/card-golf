@@ -54,12 +54,12 @@ export function GameLobby({ game }: GameLobbyProps) {
         </div>
 
         {/* Game Code */}
-        <div className="rounded-lg bg-green-900/50 p-8 space-y-4">
+        <div className="rounded-lg bg-green-900/50 p-4 sm:p-8 space-y-4">
           <div className="text-center">
             <p className="text-sm text-green-300 mb-2">Game Code</p>
             <button
               onClick={copyCode}
-              className="text-6xl font-mono font-bold tracking-wider hover:text-green-300 transition"
+              className="text-4xl sm:text-6xl font-mono font-bold tracking-widest hover:text-green-300 transition break-all"
               title="Click to copy"
             >
               {game.code}

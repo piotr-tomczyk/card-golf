@@ -23,34 +23,50 @@ export function TurnIndicator({
   totalRounds,
   isFinalTurn,
 }: TurnIndicatorProps) {
+  if (isFinalTurn) {
+    return (
+      <div className="sticky top-0 z-10 overflow-hidden">
+        {/* Amber background with subtle stripe pattern */}
+        <div
+          className="relative bg-amber-500 px-3 py-2 text-center"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(0,0,0,0.06) 8px, rgba(0,0,0,0.06) 16px)",
+          }}
+        >
+          {/* FINAL TURN label */}
+          <p
+            className="text-xs font-black uppercase tracking-[0.25em] text-amber-900/80"
+          >
+            ⚑ Final Turn ⚑
+          </p>
+
+          {/* Who's playing */}
+          <p className="mt-0.5 text-base font-bold leading-tight text-white drop-shadow-sm">
+            {isYourTurn ? "Your Turn — make it count!" : `${currentPlayerName}'s Turn`}
+          </p>
+
+          {/* Round / turn counter */}
+          <p className="mt-0.5 text-xs font-semibold text-amber-900/70">
+            Round {currentRound}/{totalRounds} · Turn {turnNumber}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className={`sticky top-0 z-10 rounded-lg px-4 py-3 ${
-        isFinalTurn
-          ? "bg-yellow-600 animate-pulse"
-          : isYourTurn
-            ? "bg-green-600"
-            : "bg-green-900/80"
+        isYourTurn ? "bg-green-600" : "bg-green-900/80"
       }`}
     >
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3 min-w-0">
-          {isFinalTurn && (
-            <span className="shrink-0 text-sm font-bold text-white">FINAL TURN</span>
-          )}
-          {isYourTurn ? (
-            <span className="text-lg font-bold text-white truncate">
-              Your Turn
-            </span>
-          ) : (
-            <span className="text-lg font-bold text-white/80 truncate">
-              {currentPlayerName}&apos;s Turn
-            </span>
-          )}
-        </div>
-
-        <span className="shrink-0 text-sm text-white/70">
-          Round {currentRound}/{totalRounds} &middot; Turn {turnNumber}
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-0.5">
+        <span className={`text-base font-bold leading-tight text-white ${!isYourTurn ? "text-white/80" : ""}`}>
+          {isYourTurn ? "Your Turn" : `${currentPlayerName}'s Turn`}
+        </span>
+        <span className="text-sm text-white/70 shrink-0">
+          Round {currentRound}/{totalRounds} · Turn {turnNumber}
         </span>
       </div>
     </div>
