@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { api, type RouterOutputs } from "@/trpc/react";
+import { Confetti } from "./Confetti";
 
 type GameState = RouterOutputs["game"]["getByCode"];
 
@@ -33,6 +34,7 @@ export function GameOverScreen({ game }: GameOverScreenProps) {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-green-800 to-green-950 px-4 py-8 text-white">
+      <Confetti active={!isDraw} />
       <div className="w-full max-w-4xl space-y-8">
         {/* Winner Announcement */}
         <div className="text-center space-y-4">
