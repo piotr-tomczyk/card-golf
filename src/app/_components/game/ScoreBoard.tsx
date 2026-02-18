@@ -8,10 +8,20 @@ type GameState = RouterOutputs["game"]["getByCode"];
 
 interface ScoreBoardProps {
   game: GameState;
+  userId?: string;
 }
 
-export function ScoreBoard({ game }: ScoreBoardProps) {
+export function ScoreBoard({ game, userId }: ScoreBoardProps) {
   const t = useTranslations("ScoreBoard");
+
+  const isCurrentPlayer = (player: GameState["players"][number]) => {
+    if (userId && !player.isGuest) return player.userId === userId;
+    if (typeof window !== "undefined") {
+      const guestId = localStorage.getItem("guestId");
+      if (guestId && player.isGuest) return player.userId === `guest_${guestId}`;
+    }
+    return false;
+  };
   const [isExpanded, setIsExpanded] = useState(false);
 
   const { data: roundScores } = api.game.getRoundScores.useQuery(
@@ -32,7 +42,13 @@ export function ScoreBoard({ game }: ScoreBoardProps) {
             <div className="text-right">
               {game.players.map((player) => (
                 <div key={player.id} className="text-sm">
-                  <span className="text-green-300">{player.displayName}:</span>{" "}
+                  <span className="text-green-300">
+                    {player.displayName}
+                    {isCurrentPlayer(player) && (
+                      <span className="ml-1 text-green-500">{t("youSuffix")}</span>
+                    )}
+                    :
+                  </span>{" "}
                   <span className="font-bold text-white">{player.totalScore}</span>
                 </div>
               ))}
@@ -59,6 +75,9 @@ export function ScoreBoard({ game }: ScoreBoardProps) {
                         className="text-right py-2 px-3 text-green-300"
                       >
                         {player.displayName}
+                        {isCurrentPlayer(player) && (
+                          <span className="ml-1 text-green-500">{t("youSuffix")}</span>
+                        )}
                       </th>
                     ))}
                   </tr>

@@ -410,7 +410,7 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
 
           {/* Bottom bar: scores + errors */}
           <div className="mt-auto pt-2 space-y-2">
-            <ScoreBoard game={game} />
+            <ScoreBoard game={game} userId={userId} />
 
             {/* Error Display */}
             {(drawCard.error ||

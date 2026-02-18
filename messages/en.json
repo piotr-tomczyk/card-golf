@@ -18,7 +18,7 @@
     "creating": "Creating...",
     "createGame": "Create Game",
     "joinGame": "Join Game",
-    "enterCode": "Enter 6-character code",
+    "enterCode": "Enter code or paste link",
     "joining": "Joining...",
     "join": "Join Game",
     "playingAs": "Playing as {name}",
@@ -98,6 +98,7 @@
     "opponentTurn": "{name}'s Turn"
   },
   "ScoreBoard": {
+    "youSuffix": "(you)",
     "totalScores": "Total Scores",
     "round": "Round",
     "total": "Total",
@@ -108,6 +109,7 @@
     "you": "You"
   },
   "RoundEndScreen": {
+    "youSuffix": "(you)",
     "roundOf": "Round {current} of {total}",
     "cardsDown": "Cards Down",
     "thisRound": "this round",
@@ -131,6 +133,7 @@
     "tapToTake": "Tap to take"
   },
   "GameOverScreen": {
+    "youSuffix": "(you)",
     "itsADraw": "It's a Draw!",
     "wins": "{name} Wins!",
     "drawDesc": "{names} tied with {score} points",

@@ -11,6 +11,7 @@ type GameState = RouterOutputs["game"]["getByCode"];
 interface RoundEndScreenProps {
   game: GameState;
   refetch: () => void;
+  userId?: string;
 }
 
 /** Cards arranged in a grid, each flipping in with a staggered delay */
@@ -68,8 +69,17 @@ function RevealGrid({
   );
 }
 
-export function RoundEndScreen({ game, refetch }: RoundEndScreenProps) {
+export function RoundEndScreen({ game, refetch, userId }: RoundEndScreenProps) {
   const t = useTranslations("RoundEndScreen");
+
+  const isCurrentPlayer = (player: GameState["players"][number]) => {
+    if (userId && !player.isGuest) return player.userId === userId;
+    if (typeof window !== "undefined") {
+      const guestId = localStorage.getItem("guestId");
+      if (guestId && player.isGuest) return player.userId === `guest_${guestId}`;
+    }
+    return false;
+  };
   const [showScores, setShowScores] = useState(false);
   const [showWinner, setShowWinner] = useState(false);
   const [showButton, setShowButton] = useState(false);
@@ -211,6 +221,9 @@ export function RoundEndScreen({ game, refetch }: RoundEndScreenProps) {
                     )}
                     <span className="text-base font-bold text-white">
                       {player.displayName}
+                      {isCurrentPlayer(player) && (
+                        <span className="ml-1.5 text-sm font-normal text-green-400">{t("youSuffix")}</span>
+                      )}
                     </span>
                   </div>
 

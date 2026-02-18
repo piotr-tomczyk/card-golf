@@ -14,6 +14,14 @@ export function GameLobbyActions({ session }: GameLobbyActionsProps) {
   const t = useTranslations("LobbyActions");
   const router = useRouter();
   const [joinCode, setJoinCode] = useState("");
+
+  const extractCode = (value: string): string => {
+    // Accept a full game URL like https://example.com/game/ABC123
+    const match = /\/game\/([A-Za-z0-9]{6})/i.exec(value);
+    if (match) return match[1]!.toUpperCase();
+    // Plain code — uppercase, strip non-alphanumeric, cap at 6
+    return value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+  };
   const [guestName, setGuestName] = useState("");
   const [showGuestInput, setShowGuestInput] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
@@ -210,10 +218,9 @@ export function GameLobbyActions({ session }: GameLobbyActionsProps) {
         <input
           type="text"
           value={joinCode}
-          onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+          onChange={(e) => setJoinCode(extractCode(e.target.value))}
           onKeyDown={(e) => e.key === "Enter" && handleJoinGame()}
           placeholder={t("enterCode")}
-          maxLength={6}
           className="w-full rounded-lg bg-green-950 px-4 py-3 text-center text-2xl font-mono uppercase tracking-widest text-white placeholder-green-400 outline-none focus:ring-2 focus:ring-green-500"
         />
         <button

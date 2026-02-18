@@ -9,10 +9,20 @@ type GameState = RouterOutputs["game"]["getByCode"];
 
 interface GameOverScreenProps {
   game: GameState;
+  userId?: string;
 }
 
-export function GameOverScreen({ game }: GameOverScreenProps) {
+export function GameOverScreen({ game, userId }: GameOverScreenProps) {
   const t = useTranslations("GameOverScreen");
+
+  const isCurrentPlayer = (player: GameState["players"][number]) => {
+    if (userId && !player.isGuest) return player.userId === userId;
+    if (typeof window !== "undefined") {
+      const guestId = localStorage.getItem("guestId");
+      if (guestId && player.isGuest) return player.userId === `guest_${guestId}`;
+    }
+    return false;
+  };
   const router = useRouter();
 
   const { data: roundScores } = api.game.getRoundScores.useQuery({
@@ -76,7 +86,12 @@ export function GameOverScreen({ game }: GameOverScreenProps) {
                       {rank}
                     </div>
                     <div>
-                      <p className="text-xl font-bold">{player.displayName}</p>
+                      <p className="text-xl font-bold">
+                        {player.displayName}
+                        {isCurrentPlayer(player) && (
+                          <span className="ml-1.5 text-sm font-normal text-green-400">{t("youSuffix")}</span>
+                        )}
+                      </p>
                       {player.isGuest && (
                         <p className="text-sm text-green-400">{t("guest")}</p>
                       )}
@@ -111,6 +126,9 @@ export function GameOverScreen({ game }: GameOverScreenProps) {
                         className="text-right py-2 px-3 text-green-300"
                       >
                         {player.displayName}
+                        {isCurrentPlayer(player) && (
+                          <span className="ml-1 font-normal text-green-500">{t("youSuffix")}</span>
+                        )}
                       </th>
                     ))}
                   </tr>
