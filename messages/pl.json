@@ -141,7 +141,9 @@
   },
   "ActionBar": {
     "waitingForOpponent": "Oczekiwanie na przeciwnika...",
-    "idleHint": "Dotknij talii, aby dobrać · Dotknij stosu odrzutów, aby wziąć · Dotknij zakrytej karty, aby odkryć",
+    "idleHint1": "Dotknij talii, aby dobrać",
+    "idleHint2": "Dotknij stosu odrzutów, aby wziąć",
+    "idleHint3": "Dotknij zakrytej karty, aby odkryć",
     "holdingDrawnCard": "Przeciągnij lub dotknij pozycję w ręce, aby zastąpić, lub odrzuć",
     "choosingReplacement": "Dotknij kartę na swojej ręce, aby ją zastąpić"
   },

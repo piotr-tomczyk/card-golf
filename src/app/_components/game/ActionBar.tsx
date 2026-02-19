@@ -30,9 +30,11 @@ export function ActionBar({
 
   if (turnState === "idle") {
     return (
-      <p className="text-xs text-green-300 text-center">
-        {t("idleHint")}
-      </p>
+      <div className="flex flex-col items-center text-xs text-green-300 text-center leading-5">
+        <span>{t("idleHint1")}</span>
+        <span>{t("idleHint2")}</span>
+        <span>{t("idleHint3")}</span>
+      </div>
     );
   }
 

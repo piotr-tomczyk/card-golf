@@ -81,12 +81,12 @@ export function GameOverScreen({ game, userId }: GameOverScreenProps) {
                       : "bg-green-800/50"
                   }`}
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-700 text-2xl font-bold">
+                  <div className="flex items-center gap-4 min-w-0">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-700 text-2xl font-bold">
                       {rank}
                     </div>
-                    <div>
-                      <p className="text-xl font-bold">
+                    <div className="min-w-0">
+                      <p className="text-xl font-bold truncate">
                         {player.displayName}
                         {isCurrentPlayer(player) && (
                           <span className="ml-1.5 text-sm font-normal text-green-400">{t("youSuffix")}</span>
@@ -97,7 +97,7 @@ export function GameOverScreen({ game, userId }: GameOverScreenProps) {
                       )}
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right shrink-0 pl-3">
                     <p className="text-3xl font-bold text-white">
                       {player.totalScore}
                     </p>

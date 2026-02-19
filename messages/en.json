@@ -141,7 +141,9 @@
   },
   "ActionBar": {
     "waitingForOpponent": "Waiting for opponent...",
-    "idleHint": "Tap deck to draw · Tap discard to take · Tap face-down card to reveal",
+    "idleHint1": "Tap deck to draw",
+    "idleHint2": "Tap discard to take",
+    "idleHint3": "Tap face-down card to reveal",
     "holdingDrawnCard": "Drag or tap a hand position to replace, or discard",
     "choosingReplacement": "Tap a card in your hand to replace it"
   },

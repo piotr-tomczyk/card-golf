@@ -41,15 +41,15 @@ export function ScoreBoard({ game, userId }: ScoreBoardProps) {
           <div className="flex items-center gap-4">
             <div className="text-right">
               {game.players.map((player) => (
-                <div key={player.id} className="text-sm">
-                  <span className="text-green-300">
+                <div key={player.id} className="flex items-baseline justify-end gap-1 text-sm max-w-[160px]">
+                  <span className="text-green-300 truncate min-w-0">
                     {player.displayName}
-                    {isCurrentPlayer(player) && (
-                      <span className="ml-1 text-green-500">{t("youSuffix")}</span>
-                    )}
-                    :
-                  </span>{" "}
-                  <span className="font-bold text-white">{player.totalScore}</span>
+                  </span>
+                  {isCurrentPlayer(player) && (
+                    <span className="text-green-500 shrink-0">{t("youSuffix")}</span>
+                  )}
+                  <span className="text-green-300 shrink-0">:</span>
+                  <span className="font-bold text-white shrink-0">{player.totalScore}</span>
                 </div>
               ))}
             </div>
