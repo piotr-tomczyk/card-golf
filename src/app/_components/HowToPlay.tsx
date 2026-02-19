@@ -28,7 +28,7 @@ function MiniCard({
   suit?: Suit;
   faceDown?: boolean;
   matched?: boolean;
-  matchType?: "column" | "row" | "diagonal";
+  matchType?: "column" | "row" | "diagonal" | "square";
 }) {
   const isRed = suit === "H" || suit === "D";
   if (faceDown) {
@@ -48,7 +48,9 @@ function MiniCard({
       ? "border border-sky-400 bg-sky-50 shadow-[0_0_6px_1px_rgba(125,211,252,0.55)]"
       : matchType === "row"
         ? "border border-amber-400 bg-amber-50 shadow-[0_0_6px_1px_rgba(251,191,36,0.55)]"
-        : "border border-violet-400 bg-violet-50 shadow-[0_0_6px_1px_rgba(196,132,252,0.55)]"
+        : matchType === "diagonal"
+          ? "border border-violet-400 bg-violet-50 shadow-[0_0_6px_1px_rgba(196,132,252,0.55)]"
+          : "border border-emerald-400 bg-emerald-50 shadow-[0_0_6px_1px_rgba(52,211,153,0.55)]"
     : "border border-neutral-300 bg-white";
 
   return (
@@ -80,7 +82,7 @@ function MiniGrid({
   cards,
   cols = 3,
 }: {
-  cards: Array<{ rank?: string; suit?: Suit; faceDown?: boolean; matched?: boolean; matchType?: "column" | "row" | "diagonal" }>;
+  cards: Array<{ rank?: string; suit?: Suit; faceDown?: boolean; matched?: boolean; matchType?: "column" | "row" | "diagonal" | "square" }>;
   cols?: number;
 }) {
   return (
@@ -471,6 +473,39 @@ function NineCardRules({ t }: { t: ReturnType<typeof useTranslations<"HowToPlay"
             <span className="rounded bg-violet-900/50 px-2 py-0.5 text-[11px] font-bold text-violet-300">
               0 {t("ptsLabel")} ✓
             </span>
+          </div>
+        </div>
+      </Rule>
+
+      {/* SQUARE BONUS */}
+      <Rule icon="🟩" title={t("squareTitle")}>
+        <p>{t("squareBody")}</p>
+        <div className="flex flex-wrap items-start justify-center gap-6 pt-2">
+          {/* Square example */}
+          <div className="flex flex-col items-center gap-1.5">
+            <MiniGrid
+              cols={3}
+              cards={[
+                { rank: "6", suit: "S", matched: true, matchType: "square" },
+                { rank: "6", suit: "H", matched: true, matchType: "square" },
+                { rank: "3", suit: "D" },
+                { rank: "6", suit: "C", matched: true, matchType: "square" },
+                { rank: "6", suit: "D", matched: true, matchType: "square" },
+                { rank: "J", suit: "S" },
+                { rank: "9", suit: "H" },
+                { rank: "2", suit: "C" },
+                { rank: "A", suit: "D" },
+              ]}
+            />
+            <p className="text-[10px] text-emerald-400 italic">{t("squareLabel")}</p>
+            <span className="rounded bg-emerald-900/50 px-2 py-0.5 text-[11px] font-bold text-emerald-300">
+              −6 {t("ptsLabel")} each ✓
+            </span>
+          </div>
+
+          {/* Explanation */}
+          <div className="flex flex-col justify-center gap-2 text-xs text-green-300 max-w-[140px]">
+            <p>{t("squareExamples")}</p>
           </div>
         </div>
       </Rule>

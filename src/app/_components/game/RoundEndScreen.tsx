@@ -25,7 +25,7 @@ function RevealGrid({
   cards: { card: CardType | null; faceUp: boolean }[];
   cols: number;
   startDelay?: number;
-  matchedPositions?: Record<number, "column" | "row" | "diagonal">;
+  matchedPositions?: Record<number, "column" | "row" | "diagonal" | "square">;
 }) {
   return (
     <>

@@ -153,6 +153,61 @@
   pointer-events: none;
 }
 
+/* ── Square match — emerald/green ───────────────────────────────────────── */
+
+.matched-card-square {
+  position: relative;
+}
+
+.matched-card-square::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 10px;
+  padding: 3px;
+  background: conic-gradient(
+    from var(--matched-angle),
+    #6ee7b7,
+    #34d399,
+    #10b981,
+    #059669,
+    #a7f3d0,
+    #6ee7b7
+  );
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  animation: matched-border-spin 3s linear infinite;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.matched-card-square::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 14px;
+  background: conic-gradient(
+    from var(--matched-angle),
+    rgba(110, 231, 183, 0.4),
+    rgba(52, 211, 153, 0.1),
+    rgba(16, 185, 129, 0.4),
+    rgba(5, 150, 105, 0.1),
+    rgba(167, 243, 208, 0.4),
+    rgba(110, 231, 183, 0.1)
+  );
+  filter: blur(8px);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  padding: 6px;
+  animation: matched-border-spin 3s linear infinite;
+  z-index: 0;
+  pointer-events: none;
+}
+
 /* ── Diagonal match — violet/purple ─────────────────────────────────────── */
 
 .matched-card-diagonal {

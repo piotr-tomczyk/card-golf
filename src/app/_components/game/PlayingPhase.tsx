@@ -21,7 +21,7 @@ import { ScoreStrip } from "./ScoreStrip";
 import { HowToPlay } from "@/app/_components/HowToPlay";
 import { api, type RouterOutputs } from "@/trpc/react";
 import { CARD_VALUES, type Rank } from "@/server/game/types";
-import { getMatchedLineTypes } from "@/server/game/scoring";
+import { getMatchedLineTypes, squareCardScore } from "@/server/game/scoring";
 
 type GameState = RouterOutputs["game"]["getByCode"];
 
@@ -149,9 +149,14 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
     let total = 0;
     for (let i = 0; i < hand.length; i++) {
       const slot = hand[i];
-      if (slot?.faceUp && slot.card && !(i in matchedPos)) {
+      if (!slot?.faceUp || !slot.card) continue;
+      const type = matchedPos[i];
+      if (type === "square") {
+        total += squareCardScore(slot.card[0] as Rank);
+      } else if (!type) {
         total += CARD_VALUES[slot.card[0] as Rank] ?? 0;
       }
+      // line types score 0
     }
     return total;
   };
