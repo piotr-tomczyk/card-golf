@@ -297,11 +297,7 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
     <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
       <div className="flex min-h-screen flex-col bg-gradient-to-b from-green-800 to-green-950 px-2 py-2 text-white md:px-4 md:py-3 md:h-screen md:overflow-hidden">
           {/* Sticky header: turn indicator + mobile score strip */}
-          <div className="sticky top-0 z-10 flex flex-col gap-0 relative">
-            {/* Help button */}
-            <div className="absolute right-1 top-1 z-20">
-              <HowToPlay compact />
-            </div>
+          <div className="sticky top-0 z-10 flex flex-col gap-0">
             <TurnIndicator
               currentPlayerName={currentTurnPlayer.displayName}
               isYourTurn={isYourTurn}
@@ -309,6 +305,7 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
               currentRound={game.currentRound}
               totalRounds={totalRounds}
               isFinalTurn={game.status === "final_turn"}
+              helpButton={<HowToPlay compact />}
             />
 
             {/* Score Strip - always-visible on mobile so you don't need to scroll */}

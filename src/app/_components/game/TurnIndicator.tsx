@@ -15,6 +15,8 @@ interface TurnIndicatorProps {
   totalRounds: number;
   /** Whether in final turn phase */
   isFinalTurn: boolean;
+  /** Optional element rendered at the trailing edge (e.g. a help button) */
+  helpButton?: React.ReactNode;
 }
 
 export function TurnIndicator({
@@ -24,6 +26,7 @@ export function TurnIndicator({
   currentRound,
   totalRounds,
   isFinalTurn,
+  helpButton,
 }: TurnIndicatorProps) {
   const t = useTranslations("TurnIndicator");
 
@@ -39,9 +42,7 @@ export function TurnIndicator({
           }}
         >
           {/* FINAL TURN label */}
-          <p
-            className="text-xs font-black uppercase tracking-[0.25em] text-amber-900/80"
-          >
+          <p className="text-xs font-black uppercase tracking-[0.25em] text-amber-900/80">
             {t("finalTurnLabel")}
           </p>
 
@@ -54,6 +55,13 @@ export function TurnIndicator({
           <p className="mt-0.5 text-xs font-semibold text-amber-900/70">
             {t("roundTurnCounter", { current: currentRound, total: totalRounds, turn: turnNumber })}
           </p>
+
+          {/* Help button — top-right, contained within this div */}
+          {helpButton && (
+            <div className="absolute right-2 top-1/2 -translate-y-1/2">
+              {helpButton}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -65,13 +73,14 @@ export function TurnIndicator({
         isYourTurn ? "bg-green-600" : "bg-green-900/80"
       }`}
     >
-      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-0.5">
-        <span className={`text-base font-bold leading-tight text-white ${!isYourTurn ? "text-white/80" : ""}`}>
+      <div className="flex items-center gap-x-4 gap-y-0.5">
+        <span className={`flex-1 text-base font-bold leading-tight text-white ${!isYourTurn ? "text-white/80" : ""}`}>
           {isYourTurn ? t("yourTurn") : t("opponentTurn", { name: currentPlayerName })}
         </span>
         <span className="text-sm text-white/70 shrink-0">
           {t("roundTurnCounter", { current: currentRound, total: totalRounds, turn: turnNumber })}
         </span>
+        {helpButton && <div className="shrink-0">{helpButton}</div>}
       </div>
     </div>
   );
