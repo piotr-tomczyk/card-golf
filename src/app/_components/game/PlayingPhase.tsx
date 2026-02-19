@@ -21,7 +21,7 @@ import { ScoreStrip } from "./ScoreStrip";
 import { HowToPlay } from "@/app/_components/HowToPlay";
 import { api, type RouterOutputs } from "@/trpc/react";
 import { CARD_VALUES, type Rank } from "@/server/game/types";
-import { getMatchedLineTypes, squareCardScore } from "@/server/game/scoring";
+import { getMatchedLineTypes, calcSquareBonuses } from "@/server/game/scoring";
 
 type GameState = RouterOutputs["game"]["getByCode"];
 
@@ -150,14 +150,13 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
     for (let i = 0; i < hand.length; i++) {
       const slot = hand[i];
       if (!slot?.faceUp || !slot.card) continue;
-      const type = matchedPos[i];
-      if (type === "square") {
-        total += squareCardScore(slot.card[0] as Rank);
-      } else if (!type) {
+      if (!matchedPos[i]) {
         total += CARD_VALUES[slot.card[0] as Rank] ?? 0;
       }
-      // line types score 0
+      // square and line positions: 0 individually
     }
+    // Add −(rank value) once per matched square group
+    total += calcSquareBonuses(hand, game.config.gridCols);
     return total;
   };
 

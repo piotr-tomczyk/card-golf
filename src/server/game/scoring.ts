@@ -15,6 +15,7 @@ const SQUARE_BLOCKS: number[][] = [
  * part of a matching line or square (same rank). Only includes face-up, non-null cards.
  *
  * For 3×3 grids: checks 2×2 squares first, then columns, rows, and diagonals.
+ * Squares only activate for positive-value ranks (K=0 and 2=−2 are excluded).
  * For other grids: checks columns only.
  *
  * Priority: square > column > row > diagonal (first match per position wins).
@@ -27,42 +28,51 @@ export function getMatchedLineTypes(
   const result: Record<number, MatchType> = {};
   const isNineCard = gridRows === 3 && gridCols === 3;
 
-  const checkGroup = (positions: number[], type: MatchType) => {
+  const checkLine = (positions: number[], type: MatchType) => {
     const valid = positions
       .map((pos) => ({ pos, slot: hand[pos] }))
       .filter(({ slot }) => slot?.faceUp && slot.card !== null);
 
-    if (valid.length !== positions.length) return; // not all visible
+    if (valid.length !== positions.length) return;
     const firstRank = valid[0]!.slot!.card!.slice(0, 1);
     if (!valid.every(({ slot }) => slot!.card!.startsWith(firstRank))) return;
 
     for (const { pos } of valid) {
-      if (!(pos in result)) result[pos] = type; // first match wins (priority)
+      if (!(pos in result)) result[pos] = type;
     }
   };
 
   if (isNineCard) {
-    // 2×2 squares (highest priority)
+    // 2×2 squares (highest priority) — only for positive-value ranks
     for (const block of SQUARE_BLOCKS) {
-      checkGroup(block, "square");
+      const valid = block
+        .map((pos) => ({ pos, slot: hand[pos] }))
+        .filter(({ slot }) => slot?.faceUp && slot.card !== null);
+      if (valid.length !== 4) continue;
+      const firstRank = valid[0]!.slot!.card!.slice(0, 1);
+      if (!valid.every(({ slot }) => slot!.card!.startsWith(firstRank))) continue;
+      if ((CARD_VALUES[firstRank as Rank] ?? 0) <= 0) continue; // K and 2 don't activate
+      for (const { pos } of valid) {
+        if (!(pos in result)) result[pos] = "square";
+      }
     }
     // Columns (priority 2)
     for (let col = 0; col < gridCols; col++) {
-      checkGroup([0, 1, 2].map((row) => row * gridCols + col), "column");
+      checkLine([0, 1, 2].map((row) => row * gridCols + col), "column");
     }
     // Rows (priority 3)
     for (let row = 0; row < gridRows; row++) {
-      checkGroup([0, 1, 2].map((col) => row * gridCols + col), "row");
+      checkLine([0, 1, 2].map((col) => row * gridCols + col), "row");
     }
     // Diagonals (priority 4)
-    checkGroup([0, 4, 8], "diagonal");
-    checkGroup([2, 4, 6], "diagonal");
+    checkLine([0, 4, 8], "diagonal");
+    checkLine([2, 4, 6], "diagonal");
   } else {
     // Classic: columns only
     for (let col = 0; col < gridCols; col++) {
       const positions: number[] = [];
       for (let row = 0; row < gridRows; row++) positions.push(row * gridCols + col);
-      checkGroup(positions, "column");
+      checkLine(positions, "column");
     }
   }
 
@@ -70,19 +80,33 @@ export function getMatchedLineTypes(
 }
 
 /**
- * Score for a card in a 2×2 square match: the negation of its normal value.
- * Positive-scoring cards become negative (A → −1, 5 → −5, J/Q/T → −10).
- * K stays 0. 2 (normally −2) becomes +2 (a risk for squaring 2s).
+ * Returns the total bonus from matched 2×2 square groups for face-up cards.
+ * Each matched square contributes −(face value of the rank) once for the group.
+ * Only positive-value ranks are counted (K=0 and 2=−2 are excluded).
  */
-export function squareCardScore(rank: Rank): number {
-  return -(CARD_VALUES[rank] ?? 0);
+export function calcSquareBonuses(
+  hand: { card: string | null; faceUp: boolean }[],
+  gridCols: number,
+): number {
+  if (hand.length !== 9 || gridCols !== 3) return 0;
+  let bonus = 0;
+  for (const block of SQUARE_BLOCKS) {
+    const slots = block.map((pos) => hand[pos]);
+    if (!slots.every((s) => s?.faceUp && s.card !== null)) continue;
+    const firstRank = slots[0]!.card!.slice(0, 1) as Rank;
+    if (!slots.every((s) => s!.card!.startsWith(firstRank))) continue;
+    const rankValue = CARD_VALUES[firstRank] ?? 0;
+    if (rankValue <= 0) continue;
+    bonus -= rankValue; // one negative value for the whole group
+  }
+  return bonus;
 }
 
 /**
  * Calculate score for a hand.
  * - Classic: if all cards in a column share the same rank, that column scores 0.
- * - 3×3: 2×2 matching squares score negative (negated value); matching columns/rows/
- *   diagonals score 0; all other cards score normally.
+ * - 3×3: matched 2×2 squares score 0 per card plus −(rank value) once for the group;
+ *   matched columns/rows/diagonals score 0; all other cards score normally.
  */
 export function calculateScore(hand: PlayerCard[], gridCols: number): number {
   const gridRows = hand.length / gridCols;
@@ -96,15 +120,13 @@ export function calculateScore(hand: PlayerCard[], gridCols: number): number {
     for (let i = 0; i < hand.length; i++) {
       const card = hand[i];
       if (!card?.card) continue;
-      const rank = getRank(card.card);
-      const type = matchMap[i];
-      if (type === "square") {
-        total += squareCardScore(rank);
-      } else if (!type) {
-        total += CARD_VALUES[rank] ?? 0;
+      if (!matchMap[i]) {
+        total += CARD_VALUES[getRank(card.card)] ?? 0;
       }
-      // line types (column/row/diagonal): add 0
+      // square and line positions: 0 individually
     }
+    // Add one group bonus per matched square
+    total += calcSquareBonuses(asVisible, gridCols);
     return total;
   }
 

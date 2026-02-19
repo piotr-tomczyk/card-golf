@@ -499,7 +499,7 @@ function NineCardRules({ t }: { t: ReturnType<typeof useTranslations<"HowToPlay"
             />
             <p className="text-[10px] text-emerald-400 italic">{t("squareLabel")}</p>
             <span className="rounded bg-emerald-900/50 px-2 py-0.5 text-[11px] font-bold text-emerald-300">
-              −6 {t("ptsLabel")} each ✓
+              −6 {t("ptsLabel")} {t("squareTotalLabel")} ✓
             </span>
           </div>
 
