@@ -230,9 +230,12 @@ export function HowToPlay() {
                   <p className="text-green-300">{t("drawBody")}</p>
                   <div className="flex flex-wrap items-end justify-center gap-x-1.5 gap-y-2 pt-1">
                     {/* Deck */}
-                    <div className="relative flex-shrink-0">
-                      <div className="absolute -top-[2px] -left-[2px] h-[2.4rem] w-[1.7rem] rounded bg-blue-800/60" />
-                      <MiniCard faceDown />
+                    <div className="flex flex-col items-center gap-0.5 flex-shrink-0">
+                      <div className="relative">
+                        <div className="absolute top-[2px] left-[2px] h-[2.4rem] w-[1.7rem] rounded bg-blue-800/60" />
+                        <MiniCard faceDown />
+                      </div>
+                      <span className="text-[9px] text-green-500">{t("deckLabel")}</span>
                     </div>
                     <span className="text-green-500 text-xs flex-shrink-0 mb-2">→</span>
                     {/* Drawn */}
