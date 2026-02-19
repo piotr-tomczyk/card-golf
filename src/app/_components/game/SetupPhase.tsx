@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { PlayerHand } from "./PlayerHand";
+import { HowToPlay } from "@/app/_components/HowToPlay";
 import { api, type RouterOutputs } from "@/trpc/react";
 
 type GameState = RouterOutputs["game"]["getByCode"];
@@ -91,11 +92,14 @@ export function SetupPhase({ game, refetch, userId }: SetupPhaseProps) {
     <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-green-800 to-green-950 px-4 py-8 text-white">
       <div className="w-full max-w-4xl space-y-8">
         {/* Header */}
-        <div className="text-center space-y-2">
+        <div className="relative text-center space-y-2">
           <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
             {t("setupPhase")}
           </h1>
           <p className="text-xl text-green-200">{t("round", { n: game.currentRound })}</p>
+          <div className="absolute top-0 right-0">
+            <HowToPlay compact />
+          </div>
         </div>
 
         {/* Instructions */}

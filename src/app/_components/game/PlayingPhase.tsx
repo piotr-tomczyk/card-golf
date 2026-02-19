@@ -18,6 +18,7 @@ import { TurnIndicator } from "./TurnIndicator";
 import { ActionBar, type TurnState } from "./ActionBar";
 import { ScoreBoard } from "./ScoreBoard";
 import { ScoreStrip } from "./ScoreStrip";
+import { HowToPlay } from "@/app/_components/HowToPlay";
 import { api, type RouterOutputs } from "@/trpc/react";
 import { CARD_VALUES, getRank } from "@/server/game/types";
 
@@ -296,7 +297,11 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
     <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
       <div className="flex min-h-screen flex-col bg-gradient-to-b from-green-800 to-green-950 px-2 py-2 text-white md:px-4 md:py-3 md:h-screen md:overflow-hidden">
           {/* Sticky header: turn indicator + mobile score strip */}
-          <div className="sticky top-0 z-10 flex flex-col gap-0">
+          <div className="sticky top-0 z-10 flex flex-col gap-0 relative">
+            {/* Help button */}
+            <div className="absolute right-1 top-1 z-20">
+              <HowToPlay compact />
+            </div>
             <TurnIndicator
               currentPlayerName={currentTurnPlayer.displayName}
               isYourTurn={isYourTurn}

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import type { RouterOutputs } from "@/trpc/react";
+import { HowToPlay } from "@/app/_components/HowToPlay";
 
 type GameState = RouterOutputs["game"]["getByCode"];
 
@@ -46,13 +47,16 @@ export function GameLobby({ game }: GameLobbyProps) {
     <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-green-800 to-green-950 px-4 py-16 text-white">
       <div className="w-full max-w-2xl space-y-8">
         {/* Header */}
-        <div className="text-center">
+        <div className="relative text-center">
           <h1 className="text-5xl font-extrabold tracking-tight sm:text-6xl mb-4">
             {t("gameLobby")}
           </h1>
           <p className="text-xl text-green-200">
             {t("waitingForPlayers")}
           </p>
+          <div className="absolute top-0 right-0">
+            <HowToPlay compact />
+          </div>
         </div>
 
         {/* Game Code */}
