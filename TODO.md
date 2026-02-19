@@ -20,6 +20,6 @@
 [x] Add instructions of how to play
 [x] Add support for polish characters in username
 [x] Fix build warnings
-[] In the first step of the instructions fix alignment of the deck to the other cards
-[] Make how to play a modal and add ability to display it during the game as well
+[x] In the first step of the instructions fix alignment of the deck to the other cards
+[x] Make how to play a modal and add ability to display it during the game as well
 [] Add 3x3 variant
