@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Card } from "./Card";
 import { api, type RouterOutputs } from "@/trpc/react";
 import type { Card as CardType } from "@/server/game/types";
+import { getMatchedLineTypes } from "@/server/game/scoring";
 
 type GameState = RouterOutputs["game"]["getByCode"];
 
@@ -19,12 +20,12 @@ function RevealGrid({
   cards,
   cols,
   startDelay = 0,
-  matchedPositions = [],
+  matchedPositions = {},
 }: {
   cards: { card: CardType | null; faceUp: boolean }[];
   cols: number;
   startDelay?: number;
-  matchedPositions?: number[];
+  matchedPositions?: Record<number, "column" | "row" | "diagonal">;
 }) {
   return (
     <>
@@ -60,7 +61,7 @@ function RevealGrid({
               card={pc.card}
               faceUp={true}
               size="sm"
-              matched={matchedPositions.includes(i)}
+              matched={matchedPositions[i] ?? false}
             />
           </div>
         ))}
@@ -135,28 +136,10 @@ export function RoundEndScreen({ game, refetch, userId }: RoundEndScreenProps) {
     roundWinnerIds.includes(p.id),
   );
 
-  // Matched columns (same logic as PlayingPhase)
+  // Matched lines — uses face-up-all hand since all cards are revealed at round end
   const getMatchedPositions = (
     hand: { card: string | null; faceUp: boolean }[],
-  ) => {
-    const rows = hand.length / cols;
-    const matched: number[] = [];
-    for (let col = 0; col < cols; col++) {
-      const ranks: string[] = [];
-      const positions: number[] = [];
-      for (let row = 0; row < rows; row++) {
-        const slot = hand[row * cols + col];
-        if (slot?.card) {
-          positions.push(row * cols + col);
-          ranks.push(slot.card[0]!);
-        }
-      }
-      if (positions.length > 1 && ranks.every((r) => r === ranks[0])) {
-        matched.push(...positions);
-      }
-    }
-    return matched;
-  };
+  ) => getMatchedLineTypes(hand, cols);
 
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-b from-green-900 via-green-950 to-black text-white">
@@ -192,7 +175,7 @@ export function RoundEndScreen({ game, refetch, userId }: RoundEndScreenProps) {
             );
             const isWinner = roundWinnerIds.includes(player.id);
             const allFaceUp = player.hand.map((c) => ({ ...c, faceUp: true }));
-            const matched = getMatchedPositions(player.hand);
+            const matched = getMatchedPositions(allFaceUp);
             // Stagger: second player starts after first player's last card
             const playerStartDelay = 200 + playerIdx * (cardCount * 90 + 150);
 

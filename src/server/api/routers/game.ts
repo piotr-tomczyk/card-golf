@@ -189,13 +189,16 @@ export const gameRouter = createTRPCRouter({
       z
         .object({
           totalRounds: z.number().min(1).max(18).optional(),
+          gridMode: z.enum(["classic", "nine-card"]).optional(),
         })
         .optional(),
     )
     .mutation(async ({ ctx, input }) => {
+      const isNineCard = input?.gridMode === "nine-card";
       const config: GameConfig = {
         ...DEFAULT_CONFIG,
         ...(input?.totalRounds ? { totalRounds: input.totalRounds } : {}),
+        ...(isNineCard ? { gridRows: 3, gridCols: 3 } : {}),
       };
 
       const code = generateCode();

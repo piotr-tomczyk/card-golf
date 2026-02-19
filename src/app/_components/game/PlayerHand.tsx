@@ -21,8 +21,8 @@ export interface PlayerHandProps {
   droppablePositions?: number[];
   /** Grid size (2x3 = 6 cards, 3x3 = 9 cards) */
   gridSize?: { rows: number; cols: number };
-  /** Which positions are part of a matched column */
-  matchedPositions?: number[];
+  /** Map of position → match type for highlighted cards */
+  matchedPositions?: Record<number, "column" | "row" | "diagonal">;
   /** Card size */
   size?: "sm" | "md" | "lg" | "xl";
 }
@@ -50,7 +50,7 @@ export function PlayerHand({
   selectablePositions = [],
   selectedPositions = [],
   droppablePositions = [],
-  matchedPositions = [],
+  matchedPositions = {},
   gridSize = { rows: 2, cols: 3 },
   size = "md",
 }: PlayerHandProps) {
@@ -74,7 +74,7 @@ export function PlayerHand({
           const isSelectable = selectablePositions.includes(index);
           const isSelected = selectedPositions.includes(index);
           const isDroppable = droppablePositions.includes(index);
-          const isMatched = matchedPositions.includes(index);
+          const isMatched = matchedPositions[index] ?? false;
 
           // For opponent cards, only show if revealed
           const showCard = isCurrentPlayer

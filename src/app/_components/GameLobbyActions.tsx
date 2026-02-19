@@ -26,6 +26,7 @@ export function GameLobbyActions({ session }: GameLobbyActionsProps) {
   const [showGuestInput, setShowGuestInput] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
   const [totalRounds, setTotalRounds] = useState(9);
+  const [gridMode, setGridMode] = useState<"classic" | "nine-card">("classic");
 
   // Load guest name from localStorage on mount
   useEffect(() => {
@@ -86,7 +87,7 @@ export function GameLobbyActions({ session }: GameLobbyActionsProps) {
     }
 
     console.log("Calling createGame.mutate()");
-    createGame.mutate({ totalRounds });
+    createGame.mutate({ totalRounds, gridMode });
   };
 
   const handleJoinGame = () => {
@@ -175,6 +176,33 @@ export function GameLobbyActions({ session }: GameLobbyActionsProps) {
       {/* Create Game */}
       <div className="rounded-lg bg-green-900/50 p-6 space-y-4">
         <h2 className="text-2xl font-bold text-center">{t("createNewGame")}</h2>
+
+        {/* Game mode selector */}
+        <div className="rounded-lg bg-green-950/50 px-4 py-3 space-y-2">
+          <span className="text-green-200 font-medium text-sm">{t("gameMode")}</span>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setGridMode("classic")}
+              className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition ${
+                gridMode === "classic"
+                  ? "bg-green-600 text-white"
+                  : "bg-green-900 text-green-300 hover:bg-green-800"
+              }`}
+            >
+              {t("classicMode")}
+            </button>
+            <button
+              onClick={() => setGridMode("nine-card")}
+              className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition ${
+                gridMode === "nine-card"
+                  ? "bg-green-600 text-white"
+                  : "bg-green-900 text-green-300 hover:bg-green-800"
+              }`}
+            >
+              {t("nineCardMode")}
+            </button>
+          </div>
+        </div>
 
         {/* Rounds picker */}
         <div className="flex items-center justify-between rounded-lg bg-green-950/50 px-4 py-3">

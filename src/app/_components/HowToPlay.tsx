@@ -22,11 +22,13 @@ function MiniCard({
   suit,
   faceDown = false,
   matched = false,
+  matchType = "column",
 }: {
   rank?: string;
   suit?: Suit;
   faceDown?: boolean;
   matched?: boolean;
+  matchType?: "column" | "row" | "diagonal";
 }) {
   const isRed = suit === "H" || suit === "D";
   if (faceDown) {
@@ -40,13 +42,20 @@ function MiniCard({
       />
     );
   }
+
+  const matchedClass = matched
+    ? matchType === "column"
+      ? "border border-sky-400 bg-sky-50 shadow-[0_0_6px_1px_rgba(125,211,252,0.55)]"
+      : matchType === "row"
+        ? "border border-amber-400 bg-amber-50 shadow-[0_0_6px_1px_rgba(251,191,36,0.55)]"
+        : "border border-violet-400 bg-violet-50 shadow-[0_0_6px_1px_rgba(196,132,252,0.55)]"
+    : "border border-neutral-300 bg-white";
+
   return (
     <div
       className={[
         "relative h-[2.4rem] w-[1.7rem] flex-shrink-0 rounded flex flex-col p-[2px] leading-none shadow",
-        matched
-          ? "border border-amber-400 bg-amber-50 shadow-[0_0_6px_1px_rgba(251,191,36,0.55)]"
-          : "border border-neutral-300 bg-white",
+        matchedClass,
       ].join(" ")}
     >
       <span
@@ -71,7 +80,7 @@ function MiniGrid({
   cards,
   cols = 3,
 }: {
-  cards: Array<{ rank?: string; suit?: Suit; faceDown?: boolean; matched?: boolean }>;
+  cards: Array<{ rank?: string; suit?: Suit; faceDown?: boolean; matched?: boolean; matchType?: "column" | "row" | "diagonal" }>;
   cols?: number;
 }) {
   return (
@@ -140,10 +149,350 @@ function Rule({
   );
 }
 
+// ─── Shared rules sections (same for both variants) ───────────────────────────
+
+function SharedTurnRules({ t }: { t: ReturnType<typeof useTranslations<"HowToPlay">> }) {
+  return (
+    <Rule icon="↩️" title={t("turnTitle")}>
+      <p>{t("turnIntro")}</p>
+
+      <div className="space-y-3 pt-1 sm:grid sm:grid-cols-3 sm:gap-3 sm:space-y-0">
+        {/* Draw */}
+        <div className="rounded-lg bg-green-900/40 p-3 space-y-1.5">
+          <p className="font-semibold text-white text-xs uppercase tracking-wider">
+            1 · {t("drawTitle")}
+          </p>
+          <p className="text-green-300">{t("drawBody")}</p>
+          <div className="flex flex-wrap items-end justify-center gap-x-1.5 gap-y-2 pt-1">
+            {/* Deck */}
+            <div className="flex flex-col items-center gap-0.5 flex-shrink-0">
+              <div className="relative">
+                <div className="absolute top-[2px] left-[2px] h-[2.4rem] w-[1.7rem] rounded bg-blue-800/60" />
+                <MiniCard faceDown />
+              </div>
+              <span className="text-[9px] text-green-500">{t("deckLabel")}</span>
+            </div>
+            <span className="text-green-500 text-xs flex-shrink-0 mb-2">→</span>
+            {/* Drawn */}
+            <div className="flex flex-col items-center gap-0.5 flex-shrink-0">
+              <MiniCard rank="Q" suit="H" />
+              <span className="text-[9px] text-green-500">{t("drawnLabel")}</span>
+            </div>
+            <span className="text-green-500 text-xs flex-shrink-0 mb-2">→</span>
+            {/* Swap */}
+            <div className="flex flex-col items-center gap-0.5 flex-shrink-0">
+              <div className="flex items-center gap-0.5">
+                <MiniCard rank="Q" suit="H" />
+                <span className="text-[9px] text-green-400">↕</span>
+                <MiniCard rank="5" suit="S" />
+              </div>
+              <span className="text-[9px] text-green-500">{t("swapLabel")}</span>
+            </div>
+            <span className="text-green-600 text-[10px] flex-shrink-0 mb-2">{t("orLabel")}</span>
+            {/* Discard */}
+            <div className="flex flex-col items-center gap-0.5 flex-shrink-0">
+              <MiniCard rank="Q" suit="H" />
+              <span className="text-[9px] text-green-500">{t("discardLabel")}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Take from discard */}
+        <div className="rounded-lg bg-green-900/40 p-3 space-y-1.5">
+          <p className="font-semibold text-white text-xs uppercase tracking-wider">
+            2 · {t("takeTitle")}
+          </p>
+          <p className="text-green-300">{t("takeBody")}</p>
+          <div className="flex items-center gap-3 pt-1">
+            <div className="flex flex-col items-center gap-0.5">
+              <MiniCard rank="J" suit="D" />
+              <span className="text-[9px] text-green-500">{t("discardLabel")}</span>
+            </div>
+            <span className="text-green-500 text-xs">→</span>
+            <div className="flex flex-col items-center gap-0.5">
+              <div className="flex items-center gap-1">
+                <MiniCard rank="J" suit="D" />
+                <span className="text-[9px] text-green-400">↕</span>
+                <MiniCard rank="9" suit="C" />
+              </div>
+              <span className="text-[9px] text-green-500">{t("swapLabel")}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Flip */}
+        <div className="rounded-lg bg-green-900/40 p-3 space-y-1.5">
+          <p className="font-semibold text-white text-xs uppercase tracking-wider">
+            3 · {t("flipTitle")}
+          </p>
+          <p className="text-green-300">{t("flipBody")}</p>
+          <div className="flex items-center gap-3 pt-1">
+            <MiniCard faceDown />
+            <span className="text-green-500 text-xs">→</span>
+            <MiniCard rank="K" suit="S" />
+            <span className="text-[9px] italic text-green-500">{t("fullTurnNote")}</span>
+          </div>
+        </div>
+      </div>
+    </Rule>
+  );
+}
+
+function SharedValuesAndEnd({ t, variant }: { t: ReturnType<typeof useTranslations<"HowToPlay">>; variant: "classic" | "nine-card" }) {
+  const isNineCard = variant === "nine-card";
+  return (
+    <>
+      {/* CARD VALUES */}
+      <Rule icon="🎯" title={t("valuesTitle")}>
+        <div className="grid grid-cols-2 gap-2">
+          <ValuePill label="K" value={t("valuesKing")} accent="green" />
+          <ValuePill label="2" value={t("valuesTwo")} accent="red" />
+          <ValuePill label="A" value={t("valuesAce")} accent="white" />
+          <ValuePill label="J  Q  10" value={t("valuesFace")} accent="amber" />
+        </div>
+        <p className="text-xs italic text-green-500">{t("valuesOther")}</p>
+      </Rule>
+
+      {/* ROUND END */}
+      <Rule icon="⏳" title={t("endTitle")}>
+        <p>{t("endBody")}</p>
+        <div className="flex items-center justify-center gap-2 rounded-lg border border-amber-700/30 bg-amber-950/30 px-4 py-3">
+          <MiniGrid
+            cols={3}
+            cards={isNineCard ? [
+              { rank: "A", suit: "S" },
+              { rank: "K", suit: "H" },
+              { rank: "7", suit: "D" },
+              { rank: "2", suit: "C" },
+              { rank: "J", suit: "H" },
+              { rank: "9", suit: "S" },
+              { rank: "4", suit: "D" },
+              { rank: "6", suit: "C" },
+              { rank: "3", suit: "H" },
+            ] : [
+              { rank: "A", suit: "S" },
+              { rank: "K", suit: "H" },
+              { rank: "7", suit: "D" },
+              { rank: "2", suit: "C" },
+              { rank: "J", suit: "H" },
+              { rank: "9", suit: "S" },
+            ]}
+          />
+          <span className="text-xl text-amber-500">→</span>
+          <p className="text-xs text-amber-300 max-w-[100px]">{t("endTriggerNote")}</p>
+        </div>
+      </Rule>
+
+      {/* WINNING */}
+      <Rule icon="🥇" title={t("winTitle")}>
+        <p>{t("winBody")}</p>
+      </Rule>
+    </>
+  );
+}
+
+// ─── Classic rules content ────────────────────────────────────────────────────
+
+function ClassicRules({ t }: { t: ReturnType<typeof useTranslations<"HowToPlay">> }) {
+  return (
+    <>
+      {/* GOAL */}
+      <Rule icon="🏆" title={t("goalTitle")}>
+        <p>{t("goalBody")}</p>
+      </Rule>
+
+      {/* SETUP */}
+      <Rule icon="🃏" title={t("setupTitle")}>
+        <p>{t("setupBody")}</p>
+        <div className="flex flex-col items-center gap-2 pt-1">
+          <MiniGrid
+            cols={3}
+            cards={[
+              { rank: "7", suit: "S" },
+              { faceDown: true },
+              { faceDown: true },
+              { rank: "3", suit: "H" },
+              { faceDown: true },
+              { faceDown: true },
+            ]}
+          />
+          <p className="text-[10px] italic text-green-500">{t("setupGridLabel")}</p>
+        </div>
+      </Rule>
+
+      {/* TURN */}
+      <SharedTurnRules t={t} />
+
+      {/* COLUMN MATCH - classic */}
+      <Rule icon="✨" title={t("matchTitle")}>
+        <p>{t("matchBody")}</p>
+        <div className="flex items-start justify-center gap-8 pt-2">
+          {/* Normal column */}
+          <div className="flex flex-col items-center gap-1.5">
+            <MiniGrid
+              cols={1}
+              cards={[
+                { rank: "Q", suit: "H" },
+                { rank: "3", suit: "S" },
+              ]}
+            />
+            <p className="text-[10px] text-green-500 italic">{t("matchBefore")}</p>
+            <span className="rounded bg-red-900/50 px-2 py-0.5 text-[11px] font-bold text-red-300">
+              13 {t("ptsLabel")}
+            </span>
+          </div>
+
+          <div className="flex flex-col items-center justify-center self-center">
+            <span className="text-xl text-amber-700/70">vs</span>
+          </div>
+
+          {/* Matched column */}
+          <div className="flex flex-col items-center gap-1.5">
+            <MiniGrid
+              cols={1}
+              cards={[
+                { rank: "7", suit: "D", matched: true, matchType: "column" },
+                { rank: "7", suit: "C", matched: true, matchType: "column" },
+              ]}
+            />
+            <p className="text-[10px] text-sky-400 italic">{t("matchAfter")}</p>
+            <span className="rounded bg-sky-900/50 px-2 py-0.5 text-[11px] font-bold text-sky-300">
+              0 {t("ptsLabel")} ✓
+            </span>
+          </div>
+        </div>
+      </Rule>
+
+      <SharedValuesAndEnd t={t} variant="classic" />
+    </>
+  );
+}
+
+// ─── Nine-Card rules content ──────────────────────────────────────────────────
+
+function NineCardRules({ t }: { t: ReturnType<typeof useTranslations<"HowToPlay">> }) {
+  return (
+    <>
+      {/* GOAL */}
+      <Rule icon="🏆" title={t("goalTitle")}>
+        <p>{t("goalBody")}</p>
+      </Rule>
+
+      {/* SETUP (9-card specific) */}
+      <Rule icon="🃏" title={t("setupTitle")}>
+        <p>{t("setupBody9")}</p>
+        <div className="flex flex-col items-center gap-2 pt-1">
+          <MiniGrid
+            cols={3}
+            cards={[
+              { rank: "7", suit: "S" },
+              { faceDown: true },
+              { faceDown: true },
+              { rank: "3", suit: "H" },
+              { faceDown: true },
+              { faceDown: true },
+              { faceDown: true },
+              { faceDown: true },
+              { faceDown: true },
+            ]}
+          />
+          <p className="text-[10px] italic text-green-500">{t("setupGridLabel9")}</p>
+        </div>
+      </Rule>
+
+      {/* TURN (same as classic) */}
+      <SharedTurnRules t={t} />
+
+      {/* LINES MATCH (9-card specific) */}
+      <Rule icon="✨" title={t("matchTitle9")}>
+        <p>{t("matchBody9")}</p>
+        <div className="flex flex-wrap items-start justify-center gap-5 pt-2">
+          {/* Column example */}
+          <div className="flex flex-col items-center gap-1.5">
+            <MiniGrid
+              cols={3}
+              cards={[
+                { rank: "7", suit: "S", matched: true, matchType: "column" },
+                { rank: "K", suit: "H" },
+                { rank: "2", suit: "C" },
+                { rank: "7", suit: "D", matched: true, matchType: "column" },
+                { rank: "J", suit: "S" },
+                { rank: "9", suit: "H" },
+                { rank: "7", suit: "C", matched: true, matchType: "column" },
+                { rank: "4", suit: "D" },
+                { rank: "A", suit: "S" },
+              ]}
+            />
+            <p className="text-[10px] text-sky-400 italic">{t("matchVerticalLabel")}</p>
+            <span className="rounded bg-sky-900/50 px-2 py-0.5 text-[11px] font-bold text-sky-300">
+              0 {t("ptsLabel")} ✓
+            </span>
+          </div>
+
+          {/* Row example */}
+          <div className="flex flex-col items-center gap-1.5">
+            <MiniGrid
+              cols={3}
+              cards={[
+                { rank: "Q", suit: "S", matched: true, matchType: "row" },
+                { rank: "Q", suit: "H", matched: true, matchType: "row" },
+                { rank: "Q", suit: "D", matched: true, matchType: "row" },
+                { rank: "K", suit: "C" },
+                { rank: "5", suit: "S" },
+                { rank: "9", suit: "H" },
+                { rank: "2", suit: "D" },
+                { rank: "J", suit: "C" },
+                { rank: "A", suit: "S" },
+              ]}
+            />
+            <p className="text-[10px] text-amber-400 italic">{t("matchHorizontalLabel")}</p>
+            <span className="rounded bg-amber-900/50 px-2 py-0.5 text-[11px] font-bold text-amber-300">
+              0 {t("ptsLabel")} ✓
+            </span>
+          </div>
+
+          {/* Diagonal example */}
+          <div className="flex flex-col items-center gap-1.5">
+            <MiniGrid
+              cols={3}
+              cards={[
+                { rank: "5", suit: "S", matched: true, matchType: "diagonal" },
+                { rank: "K", suit: "H" },
+                { rank: "2", suit: "C" },
+                { rank: "J", suit: "D" },
+                { rank: "5", suit: "C", matched: true, matchType: "diagonal" },
+                { rank: "9", suit: "H" },
+                { rank: "4", suit: "D" },
+                { rank: "A", suit: "S" },
+                { rank: "5", suit: "H", matched: true, matchType: "diagonal" },
+              ]}
+            />
+            <p className="text-[10px] text-violet-400 italic">{t("matchDiagonalLabel")}</p>
+            <span className="rounded bg-violet-900/50 px-2 py-0.5 text-[11px] font-bold text-violet-300">
+              0 {t("ptsLabel")} ✓
+            </span>
+          </div>
+        </div>
+      </Rule>
+
+      <SharedValuesAndEnd t={t} variant="nine-card" />
+    </>
+  );
+}
+
 // ─── Modal content ────────────────────────────────────────────────────────────
 
-function HowToPlayModal({ onClose }: { onClose: () => void }) {
+function HowToPlayModal({
+  onClose,
+  defaultVariant = "classic",
+  showTabs = false,
+}: {
+  onClose: () => void;
+  defaultVariant?: "classic" | "nine-card";
+  showTabs?: boolean;
+}) {
   const t = useTranslations("HowToPlay");
+  const [activeVariant, setActiveVariant] = useState<"classic" | "nine-card">(defaultVariant);
 
   // Close on Escape
   useEffect(() => {
@@ -198,196 +547,44 @@ function HowToPlayModal({ onClose }: { onClose: () => void }) {
           >
             {t("title")}
           </h2>
-          <p className="mt-0.5 text-xs italic text-green-500">{t("subtitle")}</p>
+          {showTabs ? (
+            /* Tab toggle for homepage */
+            <div className="mt-3 flex justify-center gap-1 rounded-lg bg-green-900/50 p-1 mx-auto w-fit">
+              <button
+                onClick={() => setActiveVariant("classic")}
+                className={`rounded-md px-4 py-1.5 text-xs font-semibold transition ${
+                  activeVariant === "classic"
+                    ? "bg-amber-600 text-white shadow"
+                    : "text-green-400 hover:text-green-200"
+                }`}
+              >
+                {t("classicTab")}
+              </button>
+              <button
+                onClick={() => setActiveVariant("nine-card")}
+                className={`rounded-md px-4 py-1.5 text-xs font-semibold transition ${
+                  activeVariant === "nine-card"
+                    ? "bg-amber-600 text-white shadow"
+                    : "text-green-400 hover:text-green-200"
+                }`}
+              >
+                {t("nineCardTab")}
+              </button>
+            </div>
+          ) : (
+            <p className="mt-0.5 text-xs italic text-green-500">
+              {activeVariant === "nine-card" ? t("nineCardSubtitle") : t("subtitle")}
+            </p>
+          )}
         </div>
 
         {/* Rules content */}
         <div className="px-6 py-7 space-y-7">
-
-          {/* GOAL */}
-          <Rule icon="🏆" title={t("goalTitle")}>
-            <p>{t("goalBody")}</p>
-          </Rule>
-
-          {/* SETUP */}
-          <Rule icon="🃏" title={t("setupTitle")}>
-            <p>{t("setupBody")}</p>
-            <div className="flex flex-col items-center gap-2 pt-1">
-              <MiniGrid
-                cols={3}
-                cards={[
-                  { rank: "7", suit: "S" },
-                  { faceDown: true },
-                  { faceDown: true },
-                  { rank: "3", suit: "H" },
-                  { faceDown: true },
-                  { faceDown: true },
-                ]}
-              />
-              <p className="text-[10px] italic text-green-500">{t("setupGridLabel")}</p>
-            </div>
-          </Rule>
-
-          {/* TURN */}
-          <Rule icon="↩️" title={t("turnTitle")}>
-            <p>{t("turnIntro")}</p>
-
-            <div className="space-y-3 pt-1 sm:grid sm:grid-cols-3 sm:gap-3 sm:space-y-0">
-              {/* Draw */}
-              <div className="rounded-lg bg-green-900/40 p-3 space-y-1.5">
-                <p className="font-semibold text-white text-xs uppercase tracking-wider">
-                  1 · {t("drawTitle")}
-                </p>
-                <p className="text-green-300">{t("drawBody")}</p>
-                <div className="flex flex-wrap items-end justify-center gap-x-1.5 gap-y-2 pt-1">
-                  {/* Deck */}
-                  <div className="flex flex-col items-center gap-0.5 flex-shrink-0">
-                    <div className="relative">
-                      <div className="absolute top-[2px] left-[2px] h-[2.4rem] w-[1.7rem] rounded bg-blue-800/60" />
-                      <MiniCard faceDown />
-                    </div>
-                    <span className="text-[9px] text-green-500">{t("deckLabel")}</span>
-                  </div>
-                  <span className="text-green-500 text-xs flex-shrink-0 mb-2">→</span>
-                  {/* Drawn */}
-                  <div className="flex flex-col items-center gap-0.5 flex-shrink-0">
-                    <MiniCard rank="Q" suit="H" />
-                    <span className="text-[9px] text-green-500">{t("drawnLabel")}</span>
-                  </div>
-                  <span className="text-green-500 text-xs flex-shrink-0 mb-2">→</span>
-                  {/* Swap */}
-                  <div className="flex flex-col items-center gap-0.5 flex-shrink-0">
-                    <div className="flex items-center gap-0.5">
-                      <MiniCard rank="Q" suit="H" />
-                      <span className="text-[9px] text-green-400">↕</span>
-                      <MiniCard rank="5" suit="S" />
-                    </div>
-                    <span className="text-[9px] text-green-500">{t("swapLabel")}</span>
-                  </div>
-                  <span className="text-green-600 text-[10px] flex-shrink-0 mb-2">{t("orLabel")}</span>
-                  {/* Discard */}
-                  <div className="flex flex-col items-center gap-0.5 flex-shrink-0">
-                    <MiniCard rank="Q" suit="H" />
-                    <span className="text-[9px] text-green-500">{t("discardLabel")}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Take from discard */}
-              <div className="rounded-lg bg-green-900/40 p-3 space-y-1.5">
-                <p className="font-semibold text-white text-xs uppercase tracking-wider">
-                  2 · {t("takeTitle")}
-                </p>
-                <p className="text-green-300">{t("takeBody")}</p>
-                <div className="flex items-center gap-3 pt-1">
-                  <div className="flex flex-col items-center gap-0.5">
-                    <MiniCard rank="J" suit="D" />
-                    <span className="text-[9px] text-green-500">{t("discardLabel")}</span>
-                  </div>
-                  <span className="text-green-500 text-xs">→</span>
-                  <div className="flex flex-col items-center gap-0.5">
-                    <div className="flex items-center gap-1">
-                      <MiniCard rank="J" suit="D" />
-                      <span className="text-[9px] text-green-400">↕</span>
-                      <MiniCard rank="9" suit="C" />
-                    </div>
-                    <span className="text-[9px] text-green-500">{t("swapLabel")}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Flip */}
-              <div className="rounded-lg bg-green-900/40 p-3 space-y-1.5">
-                <p className="font-semibold text-white text-xs uppercase tracking-wider">
-                  3 · {t("flipTitle")}
-                </p>
-                <p className="text-green-300">{t("flipBody")}</p>
-                <div className="flex items-center gap-3 pt-1">
-                  <MiniCard faceDown />
-                  <span className="text-green-500 text-xs">→</span>
-                  <MiniCard rank="K" suit="S" />
-                  <span className="text-[9px] italic text-green-500">{t("fullTurnNote")}</span>
-                </div>
-              </div>
-            </div>
-          </Rule>
-
-          {/* COLUMN MATCH */}
-          <Rule icon="✨" title={t("matchTitle")}>
-            <p>{t("matchBody")}</p>
-            <div className="flex items-start justify-center gap-8 pt-2">
-              {/* Normal column */}
-              <div className="flex flex-col items-center gap-1.5">
-                <MiniGrid
-                  cols={1}
-                  cards={[
-                    { rank: "Q", suit: "H" },
-                    { rank: "3", suit: "S" },
-                  ]}
-                />
-                <p className="text-[10px] text-green-500 italic">{t("matchBefore")}</p>
-                <span className="rounded bg-red-900/50 px-2 py-0.5 text-[11px] font-bold text-red-300">
-                  13 {t("ptsLabel")}
-                </span>
-              </div>
-
-              <div className="flex flex-col items-center justify-center self-center">
-                <span className="text-xl text-amber-700/70">vs</span>
-              </div>
-
-              {/* Matched column */}
-              <div className="flex flex-col items-center gap-1.5">
-                <MiniGrid
-                  cols={1}
-                  cards={[
-                    { rank: "7", suit: "D", matched: true },
-                    { rank: "7", suit: "C", matched: true },
-                  ]}
-                />
-                <p className="text-[10px] text-amber-500 italic">{t("matchAfter")}</p>
-                <span className="rounded bg-amber-900/50 px-2 py-0.5 text-[11px] font-bold text-amber-300">
-                  0 {t("ptsLabel")} ✓
-                </span>
-              </div>
-            </div>
-          </Rule>
-
-          {/* CARD VALUES */}
-          <Rule icon="🎯" title={t("valuesTitle")}>
-            <div className="grid grid-cols-2 gap-2">
-              <ValuePill label="K" value={t("valuesKing")} accent="green" />
-              <ValuePill label="2" value={t("valuesTwo")} accent="red" />
-              <ValuePill label="A" value={t("valuesAce")} accent="white" />
-              <ValuePill label="J  Q  10" value={t("valuesFace")} accent="amber" />
-            </div>
-            <p className="text-xs italic text-green-500">{t("valuesOther")}</p>
-          </Rule>
-
-          {/* ROUND END */}
-          <Rule icon="⏳" title={t("endTitle")}>
-            <p>{t("endBody")}</p>
-            <div className="flex items-center justify-center gap-2 rounded-lg border border-amber-700/30 bg-amber-950/30 px-4 py-3">
-              <MiniGrid
-                cols={3}
-                cards={[
-                  { rank: "A", suit: "S" },
-                  { rank: "K", suit: "H" },
-                  { rank: "7", suit: "D" },
-                  { rank: "2", suit: "C" },
-                  { rank: "J", suit: "H" },
-                  { rank: "9", suit: "S" },
-                ]}
-              />
-              <span className="text-xl text-amber-500">→</span>
-              <p className="text-xs text-amber-300 max-w-[100px]">{t("endTriggerNote")}</p>
-            </div>
-          </Rule>
-
-          {/* WINNING */}
-          <Rule icon="🥇" title={t("winTitle")}>
-            <p>{t("winBody")}</p>
-          </Rule>
-
+          {activeVariant === "nine-card" ? (
+            <NineCardRules t={t} />
+          ) : (
+            <ClassicRules t={t} />
+          )}
         </div>
 
         {/* Footer */}
@@ -402,7 +599,13 @@ function HowToPlayModal({ onClose }: { onClose: () => void }) {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export function HowToPlay({ compact = false }: { compact?: boolean }) {
+export function HowToPlay({
+  compact = false,
+  variant = "classic",
+}: {
+  compact?: boolean;
+  variant?: "classic" | "nine-card";
+}) {
   const [open, setOpen] = useState(false);
   const t = useTranslations("HowToPlay");
   const close = useCallback(() => setOpen(false), []);
@@ -432,7 +635,13 @@ export function HowToPlay({ compact = false }: { compact?: boolean }) {
         </button>
       )}
 
-      {open && <HowToPlayModal onClose={close} />}
+      {open && (
+        <HowToPlayModal
+          onClose={close}
+          defaultVariant={variant}
+          showTabs={!compact}
+        />
+      )}
     </>
   );
 }

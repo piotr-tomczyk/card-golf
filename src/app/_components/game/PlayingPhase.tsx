@@ -20,7 +20,8 @@ import { ScoreBoard } from "./ScoreBoard";
 import { ScoreStrip } from "./ScoreStrip";
 import { HowToPlay } from "@/app/_components/HowToPlay";
 import { api, type RouterOutputs } from "@/trpc/react";
-import { CARD_VALUES, getRank } from "@/server/game/types";
+import { CARD_VALUES, type Rank } from "@/server/game/types";
+import { getMatchedLineTypes } from "@/server/game/scoring";
 
 type GameState = RouterOutputs["game"]["getByCode"];
 
@@ -138,54 +139,18 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
 
   const opponent = game.players.find((p) => p.id !== currentPlayer.id);
 
-  // Find positions that form a matching column (same rank, all face-up)
-  const getMatchedPositions = (hand: { card: string | null; faceUp: boolean }[]) => {
-    const cols = game.config.gridCols;
-    const rows = hand.length / cols;
-    const matched: number[] = [];
-
-    for (let col = 0; col < cols; col++) {
-      const positions: number[] = [];
-      const ranks: string[] = [];
-      for (let row = 0; row < rows; row++) {
-        const idx = row * cols + col;
-        const slot = hand[idx];
-        if (slot?.faceUp && slot.card) {
-          positions.push(idx);
-          ranks.push(getRank(slot.card as Parameters<typeof getRank>[0]));
-        }
-      }
-      if (positions.length > 1 && ranks.every((r) => r === ranks[0])) {
-        matched.push(...positions);
-      }
-    }
-    return matched;
-  };
+  // Find positions that form a matching line (same rank, all face-up)
+  const getMatchedPositions = (hand: { card: string | null; faceUp: boolean }[]) =>
+    getMatchedLineTypes(hand, game.config.gridCols);
 
   // Calculate live round score from face-up cards only
   const calcRoundScore = (hand: { card: string | null; faceUp: boolean }[]) => {
-    const cols = game.config.gridCols;
-    const rows = hand.length / cols;
+    const matchedPos = getMatchedLineTypes(hand, game.config.gridCols);
     let total = 0;
-
-    for (let col = 0; col < cols; col++) {
-      const colCards: string[] = [];
-      for (let row = 0; row < rows; row++) {
-        const slot = hand[row * cols + col];
-        if (slot?.faceUp && slot.card) colCards.push(slot.card);
-      }
-      if (colCards.length === 0) continue;
-
-      const firstRank = getRank(colCards[0]! as Parameters<typeof getRank>[0]);
-      const allMatch = colCards.every(
-        (c) => getRank(c as Parameters<typeof getRank>[0]) === firstRank,
-      );
-
-      if (allMatch && colCards.length > 1) continue;
-
-      for (const c of colCards) {
-        const rank = getRank(c as Parameters<typeof getRank>[0]);
-        total += CARD_VALUES[rank] ?? 0;
+    for (let i = 0; i < hand.length; i++) {
+      const slot = hand[i];
+      if (slot?.faceUp && slot.card && !(i in matchedPos)) {
+        total += CARD_VALUES[slot.card[0] as Rank] ?? 0;
       }
     }
     return total;
@@ -305,7 +270,7 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
               currentRound={game.currentRound}
               totalRounds={totalRounds}
               isFinalTurn={game.status === "final_turn"}
-              helpButton={<HowToPlay compact />}
+              helpButton={<HowToPlay compact variant={game.config.gridRows === 3 ? "nine-card" : "classic"} />}
             />
 
             {/* Score Strip - always-visible on mobile so you don't need to scroll */}
@@ -339,6 +304,7 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
                   label={t("opponentHand", { name: opponent.displayName, pts: calcRoundScore(opponent.hand) })}
                   isCurrentPlayer={false}
                   matchedPositions={getMatchedPositions(opponent.hand)}
+                  gridSize={{ rows: game.config.gridRows, cols: game.config.gridCols }}
                   size={isDesktop ? "lg" : "sm"}
                 />
               </div>
@@ -405,6 +371,7 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
                 selectablePositions={selectablePositions}
                 droppablePositions={droppablePositions}
                 matchedPositions={getMatchedPositions(currentPlayer.hand)}
+                gridSize={{ rows: game.config.gridRows, cols: game.config.gridCols }}
                 size={isDesktop ? "xl" : "md"}
               />
             </div>

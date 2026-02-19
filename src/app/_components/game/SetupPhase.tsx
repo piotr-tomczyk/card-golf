@@ -98,7 +98,7 @@ export function SetupPhase({ game, refetch, userId }: SetupPhaseProps) {
           </h1>
           <p className="text-xl text-green-200">{t("round", { n: game.currentRound })}</p>
           <div className="absolute top-0 right-0">
-            <HowToPlay compact />
+            <HowToPlay compact variant={game.config.gridRows === 3 ? "nine-card" : "classic"} />
           </div>
         </div>
 
@@ -139,6 +139,7 @@ export function SetupPhase({ game, refetch, userId }: SetupPhaseProps) {
               cards={opponent.hand}
               label={opponent.displayName}
               isCurrentPlayer={false}
+              gridSize={{ rows: game.config.gridRows, cols: game.config.gridCols }}
               size="sm"
             />
             {opponent.setupComplete && (
@@ -164,6 +165,7 @@ export function SetupPhase({ game, refetch, userId }: SetupPhaseProps) {
                     .filter((i) => !currentPlayer.hand[i]?.faceUp)
             }
             selectedPositions={selectedPositions}
+            gridSize={{ rows: game.config.gridRows, cols: game.config.gridCols }}
             size="md"
           />
 
