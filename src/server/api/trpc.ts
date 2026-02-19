@@ -31,7 +31,8 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
 
   // Resolve guest identity from header if no auth session
   const guestId = opts.headers.get("x-guest-id");
-  const guestName = opts.headers.get("x-guest-name");
+  const rawGuestName = opts.headers.get("x-guest-name");
+  const guestName = rawGuestName ? decodeURIComponent(rawGuestName) : null;
 
   return {
     db,

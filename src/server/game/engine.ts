@@ -8,11 +8,9 @@ import {
   uncoverCard,
 } from "./actions";
 import { calculateScore } from "./scoring";
-import type { Card, GameState, PlayerCard } from "./types";
+import type { GameState, PlayerCard } from "./types";
 import {
   GameError,
-  getCurrentPlayer,
-  getPlayer,
   validateCanDraw,
   validateHasDrawnCard,
   validateIsCurrentPlayer,

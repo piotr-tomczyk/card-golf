@@ -1,5 +1,5 @@
 import { createShuffledDeck } from "./deck";
-import type { Card, GameState, PlayerCard, PlayerState } from "./types";
+import type { GameState, PlayerCard, PlayerState } from "./types";
 
 /** Deep-clone game state for immutable updates */
 export function cloneState(state: GameState): GameState {

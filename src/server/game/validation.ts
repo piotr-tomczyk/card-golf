@@ -1,4 +1,4 @@
-import type { GameState, PlayerState, TurnAction } from "./types";
+import type { GameState, PlayerState } from "./types";
 
 export class GameError extends Error {
   constructor(message: string) {

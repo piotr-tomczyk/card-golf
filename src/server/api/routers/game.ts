@@ -1,8 +1,8 @@
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, playerProcedure } from "@/server/api/trpc";
-import { db } from "@/server/db";
+import type { Db } from "@/server/db";
 import { gamePlayers, games, roundScores } from "@/server/db/schema";
 import {
   GameError,
@@ -16,7 +16,7 @@ import {
   handleUncoverCard,
   initializeGame,
 } from "@/server/game/engine";
-import type { Card, GameConfig, GameState, PlayerCard, PlayerState } from "@/server/game/types";
+import type { Card, GameConfig, GameState } from "@/server/game/types";
 import { DEFAULT_CONFIG } from "@/server/game/types";
 import { TRPCError } from "@trpc/server";
 
@@ -31,7 +31,7 @@ function generateCode(): string {
 
 /** Load full game state from DB into engine-compatible format */
 async function loadGameState(
-  db: typeof import("@/server/db").db,
+  db: Db,
   gameId: string,
 ): Promise<GameState> {
   const game = await db.query.games.findFirst({
@@ -72,7 +72,7 @@ async function loadGameState(
 
 /** Save game state back to DB */
 async function saveGameState(
-  db: typeof import("@/server/db").db,
+  db: Db,
   state: GameState,
 ): Promise<void> {
   await db
@@ -107,7 +107,7 @@ async function saveGameState(
 /** Process round end: calculate scores, save to DB, update game state.
  *  Idempotent — checks for existing scores before inserting. */
 async function processRoundEnd(
-  database: typeof import("@/server/db").db,
+  database: Db,
   state: GameState,
 ): Promise<GameState> {
   if (state.status !== "round_ended") return state;

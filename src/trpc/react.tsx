@@ -67,10 +67,10 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
                 const newGuestId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
                 localStorage.setItem("guestId", newGuestId);
                 headers.set("x-guest-id", newGuestId);
-                headers.set("x-guest-name", guestName);
+                headers.set("x-guest-name", encodeURIComponent(guestName));
               } else if (guestId && guestName) {
                 headers.set("x-guest-id", guestId);
-                headers.set("x-guest-name", guestName);
+                headers.set("x-guest-name", encodeURIComponent(guestName));
               }
             }
 
