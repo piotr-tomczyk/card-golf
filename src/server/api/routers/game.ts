@@ -14,6 +14,10 @@ import {
   handleStartNextRound,
   handleTakeDiscardAndReplace,
   handleUncoverCard,
+  handleUseJackAbility,
+  handleUseKingAbility,
+  handleUseJokerAbility,
+  handleUseQueenAbility,
   initializeGame,
 } from "@/server/game/engine";
 import type { Card, GameConfig, GameState } from "@/server/game/types";
@@ -190,6 +194,10 @@ export const gameRouter = createTRPCRouter({
         .object({
           totalRounds: z.number().min(1).max(18).optional(),
           gridMode: z.enum(["classic", "nine-card"]).optional(),
+          specialAbilities: z.boolean().optional(),
+          includeJokers: z.boolean().optional(),
+          jokerSingleScore: z.number().min(-20).max(25).optional(),
+          jokerPairScore: z.number().min(-20).max(20).optional(),
         })
         .optional(),
     )
@@ -199,6 +207,10 @@ export const gameRouter = createTRPCRouter({
         ...DEFAULT_CONFIG,
         ...(input?.totalRounds ? { totalRounds: input.totalRounds } : {}),
         ...(isNineCard ? { gridRows: 3, gridCols: 3 } : {}),
+        specialAbilities: input?.specialAbilities ?? false,
+        includeJokers: input?.includeJokers ?? false,
+        jokerSingleScore: input?.jokerSingleScore ?? 15,
+        jokerPairScore: input?.jokerPairScore ?? -5,
       };
 
       const code = generateCode();
@@ -496,6 +508,72 @@ export const gameRouter = createTRPCRouter({
         players: playerResults,
         winnerIds,
       };
+    }),
+
+  useJackAbility: playerProcedure
+    .input(z.object({ gameId: z.string(), position: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      const state = await loadGameState(ctx.db, input.gameId);
+      try {
+        const result = handleUseJackAbility(state, ctx.playerId, input.position);
+        await saveGameState(ctx.db, result.state);
+        return { ...sanitizeForPlayer(result.state, ctx.playerId), peekedCard: result.peekedCard };
+      } catch (e) {
+        if (e instanceof GameError) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: e.message });
+        }
+        throw e;
+      }
+    }),
+
+  useQueenAbility: playerProcedure
+    .input(z.object({ gameId: z.string(), opponentId: z.string(), position: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      const state = await loadGameState(ctx.db, input.gameId);
+      try {
+        const result = handleUseQueenAbility(state, ctx.playerId, input.opponentId, input.position);
+        await saveGameState(ctx.db, result.state);
+        return { ...sanitizeForPlayer(result.state, ctx.playerId), peekedCard: result.peekedCard };
+      } catch (e) {
+        if (e instanceof GameError) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: e.message });
+        }
+        throw e;
+      }
+    }),
+
+  useKingAbility: playerProcedure
+    .input(z.object({ gameId: z.string(), myPosition: z.number(), opponentId: z.string(), opponentPosition: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      let state = await loadGameState(ctx.db, input.gameId);
+      try {
+        state = handleUseKingAbility(state, ctx.playerId, input.myPosition, input.opponentId, input.opponentPosition);
+      } catch (e) {
+        if (e instanceof GameError) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: e.message });
+        }
+        throw e;
+      }
+      state = await processRoundEnd(ctx.db, state);
+      await saveGameState(ctx.db, state);
+      return sanitizeForPlayer(state, ctx.playerId);
+    }),
+
+  useJokerAbility: playerProcedure
+    .input(z.object({ gameId: z.string(), opponentId: z.string(), pos1: z.number(), pos2: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      let state = await loadGameState(ctx.db, input.gameId);
+      try {
+        state = handleUseJokerAbility(state, ctx.playerId, input.opponentId, input.pos1, input.pos2);
+      } catch (e) {
+        if (e instanceof GameError) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: e.message });
+        }
+        throw e;
+      }
+      state = await processRoundEnd(ctx.db, state);
+      await saveGameState(ctx.db, state);
+      return sanitizeForPlayer(state, ctx.playerId);
     }),
 
   abandon: playerProcedure

@@ -1,14 +1,18 @@
 import { type Card, RANKS, SUITS } from "./types";
 
-/** Create a standard 52-card deck, optionally multiple decks */
-export function createDeck(deckCount = 1): Card[] {
+/** Create a standard 52-card deck (+ 2 Jokers per deck when withJokers=true), optionally multiple decks */
+export function createDeck(deckCount = 1, withJokers = false): Card[] {
   const deck: Card[] = [];
   for (let d = 0; d < deckCount; d++) {
     for (const rank of RANKS) {
+      if (rank === "*") continue; // Jokers are added separately below
       for (const suit of SUITS) {
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-        deck.push(`${rank}${suit}` as Card);
+        deck.push(`${rank}${suit}`);
       }
+    }
+    if (withJokers) {
+      deck.push("*S"); // Red Joker
+      deck.push("*H"); // Black Joker
     }
   }
   return deck;
@@ -24,8 +28,8 @@ export function shuffle<T>(array: T[]): T[] {
 }
 
 /** Create a shuffled deck */
-export function createShuffledDeck(deckCount = 1): Card[] {
-  return shuffle(createDeck(deckCount));
+export function createShuffledDeck(deckCount = 1, withJokers = false): Card[] {
+  return shuffle(createDeck(deckCount, withJokers));
 }
 
 /** Deal cards from the deck. Mutates the deck array. */

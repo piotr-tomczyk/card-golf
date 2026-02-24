@@ -1,5 +1,5 @@
 import { createShuffledDeck } from "./deck";
-import type { GameState, PlayerCard, PlayerState } from "./types";
+import type { Card, GameState, PlayerCard, PlayerState } from "./types";
 
 /** Deep-clone game state for immutable updates */
 export function cloneState(state: GameState): GameState {
@@ -170,11 +170,11 @@ function advanceTurn(state: GameState, actingPlayer: PlayerState): GameState {
 /** Deal a fresh hand to all players, set up deck and discard pile for a new round */
 export function setupNewRound(state: GameState): GameState {
   const next = cloneState(state);
-  const { gridRows, gridCols, deckCount } = next.config;
+  const { gridRows, gridCols, deckCount, includeJokers } = next.config;
   const handSize = gridRows * gridCols;
 
-  // Create and shuffle a fresh deck
-  next.deck = createShuffledDeck(deckCount);
+  // Create and shuffle a fresh deck (with Jokers if includeJokers is enabled)
+  next.deck = createShuffledDeck(deckCount, includeJokers ?? false);
 
   // Deal to each player
   for (const player of next.players) {
@@ -201,4 +201,97 @@ export function setupNewRound(state: GameState): GameState {
   next.currentPlayerIndex = 0;
 
   return next;
+}
+
+/**
+ * Jack ability: discard the drawn Jack and privately peek at one of your own face-down cards.
+ * Advances the turn.
+ */
+export function applyJackAbility(
+  state: GameState,
+  player: PlayerState,
+  position: number,
+): { state: GameState; peekedCard: Card } {
+  const next = cloneState(state);
+  const p = next.players.find((pl) => pl.id === player.id)!;
+
+  const peekedCard = p.hand[position]!.card;
+
+  next.discardPile.push(next.drawnCard!);
+  next.drawnCard = null;
+
+  return { state: advanceTurn(next, p), peekedCard };
+}
+
+/**
+ * Queen ability: discard the drawn Queen and privately peek at one of the opponent's face-down cards.
+ * Advances the turn.
+ */
+export function applyQueenAbility(
+  state: GameState,
+  player: PlayerState,
+  opponentId: string,
+  position: number,
+): { state: GameState; peekedCard: Card } {
+  const next = cloneState(state);
+  const p = next.players.find((pl) => pl.id === player.id)!;
+  const opponent = next.players.find((pl) => pl.id === opponentId)!;
+
+  const peekedCard = opponent.hand[position]!.card;
+
+  next.discardPile.push(next.drawnCard!);
+  next.drawnCard = null;
+
+  return { state: advanceTurn(next, p), peekedCard };
+}
+
+/**
+ * King ability: discard the drawn King and swap one of your cards with one of the opponent's cards.
+ * Cards carry their faceUp state with them. Advances the turn.
+ */
+export function applyKingAbility(
+  state: GameState,
+  player: PlayerState,
+  myPosition: number,
+  opponentId: string,
+  opponentPosition: number,
+): GameState {
+  const next = cloneState(state);
+  const p = next.players.find((pl) => pl.id === player.id)!;
+  const opponent = next.players.find((pl) => pl.id === opponentId)!;
+
+  const myCard = p.hand[myPosition]!;
+  const oppCard = opponent.hand[opponentPosition]!;
+  p.hand[myPosition] = { card: oppCard.card, faceUp: oppCard.faceUp };
+  opponent.hand[opponentPosition] = { card: myCard.card, faceUp: myCard.faceUp };
+
+  next.discardPile.push(next.drawnCard!);
+  next.drawnCard = null;
+
+  return advanceTurn(next, p);
+}
+
+/**
+ * Joker ability: discard the drawn Joker and swap any two of the opponent's card positions.
+ * Advances the turn.
+ */
+export function applyJokerAbility(
+  state: GameState,
+  player: PlayerState,
+  opponentId: string,
+  pos1: number,
+  pos2: number,
+): GameState {
+  const next = cloneState(state);
+  const p = next.players.find((pl) => pl.id === player.id)!;
+  const opponent = next.players.find((pl) => pl.id === opponentId)!;
+
+  const tmp = opponent.hand[pos1]!;
+  opponent.hand[pos1] = opponent.hand[pos2]!;
+  opponent.hand[pos2] = tmp;
+
+  next.discardPile.push(next.drawnCard!);
+  next.drawnCard = null;
+
+  return advanceTurn(next, p);
 }

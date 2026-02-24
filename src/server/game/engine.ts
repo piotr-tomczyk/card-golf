@@ -6,18 +6,25 @@ import {
   setupNewRound,
   takeDiscardAndReplace,
   uncoverCard,
+  applyJackAbility,
+  applyQueenAbility,
+  applyKingAbility,
+  applyJokerAbility,
 } from "./actions";
 import { calculateScore } from "./scoring";
-import type { GameState, PlayerCard } from "./types";
+import type { Card, GameState, PlayerCard } from "./types";
 import {
   GameError,
   validateCanDraw,
   validateHasDrawnCard,
   validateIsCurrentPlayer,
+  validateIsFaceDown,
+  validateIsPowerCard,
   validateNoDrawnCard,
   validatePlayingPhase,
   validatePosition,
   validateRevealInitialCards,
+  validateSpecialAbilities,
 } from "./validation";
 
 export { GameError } from "./validation";
@@ -117,7 +124,12 @@ export function handleRoundEnd(state: GameState): {
 
   const roundScores = state.players.map((p) => ({
     playerId: p.id,
-    score: calculateScore(p.hand, state.config.gridCols),
+    score: calculateScore(
+      p.hand,
+      state.config.gridCols,
+      state.config.jokerSingleScore ?? 15,
+      state.config.jokerPairScore ?? -5,
+    ),
     hand: p.hand.map((c) => ({ ...c, faceUp: true })),
   }));
 
@@ -155,4 +167,80 @@ export function handleStartNextRound(state: GameState): GameState {
 /** Initialize a new game's first round */
 export function initializeGame(state: GameState): GameState {
   return setupNewRound(state);
+}
+
+/** Handle Jack ability: peek at one of your own face-down cards */
+export function handleUseJackAbility(
+  state: GameState,
+  userId: string,
+  position: number,
+): { state: GameState; peekedCard: Card } {
+  const player = validateIsCurrentPlayer(state, userId);
+  validatePlayingPhase(state);
+  validateHasDrawnCard(state);
+  validateSpecialAbilities(state);
+  validateIsPowerCard(state.drawnCard!);
+  validatePosition(position, player.hand.length);
+  validateIsFaceDown(player.hand, position);
+  return applyJackAbility(state, player, position);
+}
+
+/** Handle Queen ability: peek at one of the opponent's face-down cards */
+export function handleUseQueenAbility(
+  state: GameState,
+  userId: string,
+  opponentId: string,
+  position: number,
+): { state: GameState; peekedCard: Card } {
+  const player = validateIsCurrentPlayer(state, userId);
+  validatePlayingPhase(state);
+  validateHasDrawnCard(state);
+  validateSpecialAbilities(state);
+  validateIsPowerCard(state.drawnCard!);
+  const opponent = state.players.find((p) => p.id === opponentId);
+  if (!opponent) throw new GameError("Opponent not found");
+  validatePosition(position, opponent.hand.length);
+  validateIsFaceDown(opponent.hand, position);
+  return applyQueenAbility(state, player, opponentId, position);
+}
+
+/** Handle King ability: swap one of your cards with one of the opponent's cards */
+export function handleUseKingAbility(
+  state: GameState,
+  userId: string,
+  myPosition: number,
+  opponentId: string,
+  opponentPosition: number,
+): GameState {
+  const player = validateIsCurrentPlayer(state, userId);
+  validatePlayingPhase(state);
+  validateHasDrawnCard(state);
+  validateSpecialAbilities(state);
+  validateIsPowerCard(state.drawnCard!);
+  validatePosition(myPosition, player.hand.length);
+  const opponent = state.players.find((p) => p.id === opponentId);
+  if (!opponent) throw new GameError("Opponent not found");
+  validatePosition(opponentPosition, opponent.hand.length);
+  return applyKingAbility(state, player, myPosition, opponentId, opponentPosition);
+}
+
+/** Handle Joker ability: swap any two of the opponent's card positions */
+export function handleUseJokerAbility(
+  state: GameState,
+  userId: string,
+  opponentId: string,
+  pos1: number,
+  pos2: number,
+): GameState {
+  const player = validateIsCurrentPlayer(state, userId);
+  validatePlayingPhase(state);
+  validateHasDrawnCard(state);
+  validateSpecialAbilities(state);
+  validateIsPowerCard(state.drawnCard!);
+  const opponent = state.players.find((p) => p.id === opponentId);
+  if (!opponent) throw new GameError("Opponent not found");
+  validatePosition(pos1, opponent.hand.length);
+  validatePosition(pos2, opponent.hand.length);
+  if (pos1 === pos2) throw new GameError("Must select two different positions");
+  return applyJokerAbility(state, player, opponentId, pos1, pos2);
 }

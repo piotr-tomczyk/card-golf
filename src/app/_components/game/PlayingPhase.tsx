@@ -14,14 +14,15 @@ import { PlayerHand } from "./PlayerHand";
 import { DrawPile } from "./DrawPile";
 import { DiscardPile } from "./DiscardPile";
 import { DrawnCardInline } from "./DrawnCardOverlay";
+import { Card } from "./Card";
 import { TurnIndicator } from "./TurnIndicator";
 import { ActionBar, type TurnState } from "./ActionBar";
 import { ScoreBoard } from "./ScoreBoard";
 import { ScoreStrip } from "./ScoreStrip";
 import { HowToPlay } from "@/app/_components/HowToPlay";
 import { api, type RouterOutputs } from "@/trpc/react";
-import { CARD_VALUES, type Rank } from "@/server/game/types";
-import { getMatchedLineTypes, calcSquareBonuses } from "@/server/game/scoring";
+import { CARD_VALUES, getRank, isPowerCard, type Card as CardType, type Rank } from "@/server/game/types";
+import { getMatchedLineTypes, calcSquareBonuses, calcJokerScore } from "@/server/game/scoring";
 
 type GameState = RouterOutputs["game"]["getByCode"];
 
@@ -49,6 +50,9 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
   const [turnState, setTurnState] = useState<TurnState>("idle");
   const [isChoosingForDiscard, setIsChoosingForDiscard] = useState(false);
   const [revealPosition, setRevealPosition] = useState<number | null>(null);
+  const [kingMyPosition, setKingMyPosition] = useState<number | null>(null);
+  const [jokerFirstPosition, setJokerFirstPosition] = useState<number | null>(null);
+  const [peekedCard, setPeekedCard] = useState<CardType | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -60,8 +64,12 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
   );
 
   const drawCard = api.game.drawCard.useMutation({
-    onSuccess: () => {
-      setTurnState("holding_drawn_card");
+    onSuccess: (data) => {
+      if (data.config.specialAbilities && data.drawnCard && isPowerCard(data.drawnCard)) {
+        setTurnState("holding_power_card");
+      } else {
+        setTurnState("holding_drawn_card");
+      }
       refetch();
     },
   });
@@ -90,6 +98,38 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
 
   const uncoverCard = api.game.uncoverCard.useMutation({
     onSuccess: () => {
+      setTurnState("idle");
+      refetch();
+    },
+  });
+
+  const jackAbilityMutation = api.game.useJackAbility.useMutation({
+    onSuccess: (data) => {
+      setPeekedCard(data.peekedCard);
+      setTurnState("idle");
+      refetch();
+    },
+  });
+
+  const queenAbilityMutation = api.game.useQueenAbility.useMutation({
+    onSuccess: (data) => {
+      setPeekedCard(data.peekedCard);
+      setTurnState("idle");
+      refetch();
+    },
+  });
+
+  const kingAbilityMutation = api.game.useKingAbility.useMutation({
+    onSuccess: () => {
+      setKingMyPosition(null);
+      setTurnState("idle");
+      refetch();
+    },
+  });
+
+  const jokerAbilityMutation = api.game.useJokerAbility.useMutation({
+    onSuccess: () => {
+      setJokerFirstPosition(null);
       setTurnState("idle");
       refetch();
     },
@@ -124,6 +164,8 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
       setTurnState("idle");
       setIsChoosingForDiscard(false);
       setRevealPosition(null);
+      setKingMyPosition(null);
+      setJokerFirstPosition(null);
     }
   }, [isYourTurn, game.turnNumber]);
 
@@ -147,9 +189,14 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
   const calcRoundScore = (hand: { card: string | null; faceUp: boolean }[]) => {
     const matchedPos = getMatchedLineTypes(hand, game.config.gridCols);
     let total = 0;
+    let jokerCount = 0;
     for (let i = 0; i < hand.length; i++) {
       const slot = hand[i];
       if (!slot?.faceUp || !slot.card) continue;
+      if (slot.card.startsWith("*")) {
+        jokerCount++;
+        continue; // Scored separately below
+      }
       if (!matchedPos[i]) {
         total += CARD_VALUES[slot.card[0] as Rank] ?? 0;
       }
@@ -157,6 +204,8 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
     }
     // Add −(rank value) once per matched square group
     total += calcSquareBonuses(hand, game.config.gridCols);
+    // Jokers: configured single / pair scores
+    total += calcJokerScore(jokerCount, game.config.jokerSingleScore ?? 15, game.config.jokerPairScore ?? -5);
     return total;
   };
 
@@ -182,7 +231,45 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
     }
   };
 
+  const handleCancelAbility = () => {
+    setKingMyPosition(null);
+    setJokerFirstPosition(null);
+    setTurnState("holding_power_card");
+  };
+
+  // Determine ability label for the drawn power card
+  const getAbilityLabel = () => {
+    if (!game.drawnCard) return t("useAbility");
+    const rank = getRank(game.drawnCard);
+    if (rank === "J") return t("jackAbility");
+    if (rank === "Q") return t("queenAbility");
+    if (rank === "K") return t("kingAbility");
+    if (rank === "*") return t("jokerAbility");
+    return t("useAbility");
+  };
+
+  const handleUseAbility = () => {
+    if (!game.drawnCard) return;
+    const rank = getRank(game.drawnCard);
+    if (rank === "J") setTurnState("using_jack");
+    else if (rank === "Q") setTurnState("using_queen");
+    else if (rank === "K") setTurnState("using_king_mine");
+    else if (rank === "*") setTurnState("using_joker_first");
+  };
+
   const handleCardClick = (position: number) => {
+    // Power ability states for own cards
+    if (turnState === "using_jack") {
+      jackAbilityMutation.mutate({ gameId: game.id, position });
+      return;
+    }
+
+    if (turnState === "using_king_mine") {
+      setKingMyPosition(position);
+      setTurnState("using_king_opponent");
+      return;
+    }
+
     // Holding drawn card — clicking a hand position places the card
     if (turnState === "holding_drawn_card") {
       placeDrawnCard.mutate({ gameId: game.id, position });
@@ -207,6 +294,41 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
       if (card && !card.faceUp) {
         setRevealPosition(position);
       }
+      return;
+    }
+  };
+
+  const handleOpponentCardClick = (position: number) => {
+    if (!opponent) return;
+
+    if (turnState === "using_queen") {
+      queenAbilityMutation.mutate({ gameId: game.id, opponentId: opponent.id, position });
+      return;
+    }
+
+    if (turnState === "using_king_opponent" && kingMyPosition !== null) {
+      kingAbilityMutation.mutate({
+        gameId: game.id,
+        myPosition: kingMyPosition,
+        opponentId: opponent.id,
+        opponentPosition: position,
+      });
+      return;
+    }
+
+    if (turnState === "using_joker_first") {
+      setJokerFirstPosition(position);
+      setTurnState("using_joker_second");
+      return;
+    }
+
+    if (turnState === "using_joker_second" && jokerFirstPosition !== null) {
+      jokerAbilityMutation.mutate({
+        gameId: game.id,
+        opponentId: opponent.id,
+        pos1: jokerFirstPosition,
+        pos2: position,
+      });
       return;
     }
   };
@@ -240,7 +362,11 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
     takeDiscardAndReplace.isPending ||
     placeDrawnCard.isPending ||
     discardDrawnCard.isPending ||
-    uncoverCard.isPending;
+    uncoverCard.isPending ||
+    jackAbilityMutation.isPending ||
+    queenAbilityMutation.isPending ||
+    kingAbilityMutation.isPending ||
+    jokerAbilityMutation.isPending;
 
   // Hand positions are droppable when holding a drawn card, choosing replacement,
   // or idle with a discard card available (for drag from discard pile)
@@ -251,16 +377,48 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
         ? currentPlayer.hand.map((_, i) => i)
         : [];
 
-  // Hand positions are selectable when holding drawn card, choosing replacement,
-  // or idle (for face-down card reveal)
-  const selectablePositions =
-    turnState === "holding_drawn_card" || turnState === "choosing_replacement"
-      ? currentPlayer.hand.map((_, i) => i)
-      : turnState === "idle" && isYourTurn
-        ? currentPlayer.hand
-            .map((_, i) => i)
-            .filter((i) => !currentPlayer.hand[i]?.faceUp)
-        : [];
+  // Own hand selectable positions
+  const selectablePositions = (() => {
+    if (turnState === "holding_drawn_card" || turnState === "choosing_replacement") {
+      return currentPlayer.hand.map((_, i) => i);
+    }
+    if (turnState === "using_jack") {
+      return currentPlayer.hand.map((_, i) => i).filter((i) => !currentPlayer.hand[i]?.faceUp);
+    }
+    if (turnState === "using_king_mine") {
+      return currentPlayer.hand.map((_, i) => i);
+    }
+    if (turnState === "idle" && isYourTurn) {
+      return currentPlayer.hand.map((_, i) => i).filter((i) => !currentPlayer.hand[i]?.faceUp);
+    }
+    return [];
+  })();
+
+  // Opponent hand selectable positions
+  const opponentSelectablePositions = (() => {
+    if (!opponent) return [];
+    if (turnState === "using_queen") {
+      return opponent.hand.map((_, i) => i).filter((i) => !opponent.hand[i]?.faceUp);
+    }
+    if (turnState === "using_king_opponent") {
+      return opponent.hand.map((_, i) => i);
+    }
+    if (turnState === "using_joker_first") {
+      return opponent.hand.map((_, i) => i);
+    }
+    if (turnState === "using_joker_second") {
+      return opponent.hand.map((_, i) => i).filter((i) => i !== jokerFirstPosition);
+    }
+    return [];
+  })();
+
+  const isAbilityState =
+    turnState === "using_jack" ||
+    turnState === "using_queen" ||
+    turnState === "using_king_mine" ||
+    turnState === "using_king_opponent" ||
+    turnState === "using_joker_first" ||
+    turnState === "using_joker_second";
 
   return (
     <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
@@ -307,6 +465,8 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
                   cards={opponent.hand}
                   label={t("opponentHand", { name: opponent.displayName, pts: calcRoundScore(opponent.hand) })}
                   isCurrentPlayer={false}
+                  onCardClick={handleOpponentCardClick}
+                  selectablePositions={opponentSelectablePositions}
                   matchedPositions={getMatchedPositions(opponent.hand)}
                   gridSize={{ rows: game.config.gridRows, cols: game.config.gridCols }}
                   size={isDesktop ? "lg" : "sm"}
@@ -334,13 +494,57 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
                 </div>
               )}
 
-              {/* Drawn Card Inline */}
+              {/* Drawn Card Inline (normal card) */}
               {turnState === "holding_drawn_card" && game.drawnCard && (
                 <DrawnCardInline
                   card={game.drawnCard}
                   onDiscard={handleDiscardCard}
                   disabled={isPending}
                 />
+              )}
+
+              {/* Power Card UI */}
+              {turnState === "holding_power_card" && game.drawnCard && (
+                <div className="rounded-lg bg-purple-900/40 border-2 border-purple-500/60 p-4 flex flex-col items-center gap-3">
+                  <p className="text-sm font-semibold text-purple-200 text-center">
+                    {getAbilityLabel()}
+                  </p>
+                  <Card card={game.drawnCard} faceUp={true} size="xl" />
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    <button
+                      onClick={handleUseAbility}
+                      disabled={isPending}
+                      className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {t("useAbility")}
+                    </button>
+                    <button
+                      onClick={() => setTurnState("holding_drawn_card")}
+                      disabled={isPending}
+                      className="rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {t("placeNormally")}
+                    </button>
+                    <button
+                      onClick={handleDiscardCard}
+                      disabled={isPending}
+                      className="rounded-lg border border-dashed border-red-500/60 px-4 py-2 text-sm font-semibold text-red-300 transition hover:bg-red-900/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Discard
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Cancel ability button */}
+              {isAbilityState && (
+                <button
+                  onClick={handleCancelAbility}
+                  disabled={isPending}
+                  className="rounded-lg bg-gray-700 px-4 py-2 text-sm font-semibold text-gray-200 transition hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {t("cancelAbility")}
+                </button>
               )}
 
               {/* Cancel button for discard pile selection */}
@@ -390,14 +594,22 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
               takeDiscardAndReplace.error ||
               placeDrawnCard.error ||
               discardDrawnCard.error ||
-              uncoverCard.error) && (
+              uncoverCard.error ||
+              jackAbilityMutation.error ||
+              queenAbilityMutation.error ||
+              kingAbilityMutation.error ||
+              jokerAbilityMutation.error) && (
               <div className="rounded-lg bg-red-900/50 border-2 border-red-600 p-3 text-center">
                 <p className="text-sm text-red-200">
                   {drawCard.error?.message ||
                     takeDiscardAndReplace.error?.message ||
                     placeDrawnCard.error?.message ||
                     discardDrawnCard.error?.message ||
-                    uncoverCard.error?.message}
+                    uncoverCard.error?.message ||
+                    jackAbilityMutation.error?.message ||
+                    queenAbilityMutation.error?.message ||
+                    kingAbilityMutation.error?.message ||
+                    jokerAbilityMutation.error?.message}
                 </p>
               </div>
             )}
@@ -431,6 +643,26 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
                   {t("reveal")}
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Peek Modal (Jack / Queen ability result) */}
+        {peekedCard !== null && (
+          <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+            <div className="mx-4 w-full max-w-sm rounded-xl bg-purple-900 p-6 shadow-2xl border border-purple-500">
+              <h3 className="text-xl font-bold text-white text-center mb-4">
+                {t("peekModalTitle")}
+              </h3>
+              <div className="flex justify-center mb-6">
+                <Card card={peekedCard} faceUp={true} size="xl" />
+              </div>
+              <button
+                onClick={() => setPeekedCard(null)}
+                className="w-full rounded-lg bg-purple-600 px-4 py-3 font-semibold text-white transition hover:bg-purple-500"
+              >
+                {t("peekModalClose")}
+              </button>
             </div>
           </div>
         )}

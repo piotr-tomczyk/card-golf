@@ -27,6 +27,10 @@ export function GameLobbyActions({ session }: GameLobbyActionsProps) {
   const [isHydrated, setIsHydrated] = useState(false);
   const [totalRounds, setTotalRounds] = useState(9);
   const [gridMode, setGridMode] = useState<"classic" | "nine-card">("classic");
+  const [specialAbilities, setSpecialAbilities] = useState(false);
+  const [includeJokers, setIncludeJokers] = useState(false);
+  const [jokerSingleScore, setJokerSingleScore] = useState(15);
+  const [jokerPairScore, setJokerPairScore] = useState(-5);
 
   // Load guest name from localStorage on mount
   useEffect(() => {
@@ -87,7 +91,7 @@ export function GameLobbyActions({ session }: GameLobbyActionsProps) {
     }
 
     console.log("Calling createGame.mutate()");
-    createGame.mutate({ totalRounds, gridMode });
+    createGame.mutate({ totalRounds, gridMode, specialAbilities, includeJokers, jokerSingleScore, jokerPairScore });
   };
 
   const handleJoinGame = () => {
@@ -203,6 +207,104 @@ export function GameLobbyActions({ session }: GameLobbyActionsProps) {
             </button>
           </div>
         </div>
+
+        {/* Power Cards toggle */}
+        <button
+          onClick={() => setSpecialAbilities((v) => !v)}
+          className={`w-full rounded-lg px-4 py-3 text-left transition ${
+            specialAbilities
+              ? "bg-purple-800/60 ring-2 ring-purple-500/60"
+              : "bg-green-950/50 hover:bg-green-900/60"
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span className={`font-medium text-sm ${specialAbilities ? "text-purple-200" : "text-green-200"}`}>
+              {t("powerCards")}
+            </span>
+            <span className={`text-xs font-bold px-2 py-0.5 rounded-full transition ${
+              specialAbilities ? "bg-purple-500 text-white" : "bg-green-800 text-green-400"
+            }`}>
+              {specialAbilities ? "ON" : "OFF"}
+            </span>
+          </div>
+          <p className={`mt-0.5 text-xs ${specialAbilities ? "text-purple-300" : "text-green-400"}`}>
+            {t("powerCardsDesc")}
+          </p>
+        </button>
+
+        {/* Jokers toggle */}
+        <button
+          onClick={() => setIncludeJokers((v) => !v)}
+          className={`w-full rounded-lg px-4 py-3 text-left transition ${
+            includeJokers
+              ? "bg-yellow-800/50 ring-2 ring-yellow-500/60"
+              : "bg-green-950/50 hover:bg-green-900/60"
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span className={`font-medium text-sm ${includeJokers ? "text-yellow-200" : "text-green-200"}`}>
+              {t("includeJokers")}
+            </span>
+            <span className={`text-xs font-bold px-2 py-0.5 rounded-full transition ${
+              includeJokers ? "bg-yellow-500 text-black" : "bg-green-800 text-green-400"
+            }`}>
+              {includeJokers ? "ON" : "OFF"}
+            </span>
+          </div>
+          <p className={`mt-0.5 text-xs ${includeJokers ? "text-yellow-300" : "text-green-400"}`}>
+            {t("includeJokersDesc")}
+          </p>
+        </button>
+
+        {/* Joker scoring options — shown when Jokers are enabled */}
+        {includeJokers && (
+          <div className="rounded-lg bg-yellow-900/20 border border-yellow-700/40 px-4 py-3 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-yellow-200 text-sm font-medium">{t("jokerSingleScore")}</span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setJokerSingleScore((v) => Math.max(-20, v - 1))}
+                  className="flex h-7 w-7 items-center justify-center rounded-full bg-yellow-800 text-base font-bold leading-none hover:bg-yellow-700 transition"
+                  aria-label={t("jokerScoreDecrease")}
+                >
+                  −
+                </button>
+                <span className="w-8 text-center text-base font-bold text-yellow-100">
+                  {jokerSingleScore > 0 ? `+${jokerSingleScore}` : jokerSingleScore}
+                </span>
+                <button
+                  onClick={() => setJokerSingleScore((v) => Math.min(25, v + 1))}
+                  className="flex h-7 w-7 items-center justify-center rounded-full bg-yellow-800 text-base font-bold leading-none hover:bg-yellow-700 transition"
+                  aria-label={t("jokerScoreIncrease")}
+                >
+                  +
+                </button>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-yellow-200 text-sm font-medium">{t("jokerPairScore")}</span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setJokerPairScore((v) => Math.max(-20, v - 1))}
+                  className="flex h-7 w-7 items-center justify-center rounded-full bg-yellow-800 text-base font-bold leading-none hover:bg-yellow-700 transition"
+                  aria-label={t("jokerScoreDecrease")}
+                >
+                  −
+                </button>
+                <span className="w-8 text-center text-base font-bold text-yellow-100">
+                  {jokerPairScore > 0 ? `+${jokerPairScore}` : jokerPairScore}
+                </span>
+                <button
+                  onClick={() => setJokerPairScore((v) => Math.min(20, v + 1))}
+                  className="flex h-7 w-7 items-center justify-center rounded-full bg-yellow-800 text-base font-bold leading-none hover:bg-yellow-700 transition"
+                  aria-label={t("jokerScoreIncrease")}
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Rounds picker */}
         <div className="flex items-center justify-between rounded-lg bg-green-950/50 px-4 py-3">

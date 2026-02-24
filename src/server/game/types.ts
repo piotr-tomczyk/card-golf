@@ -1,9 +1,9 @@
 // Card encoding: 2-char strings - rank + suit
-// Ranks: A, 2-9, T, J, Q, K
+// Ranks: A, 2-9, T, J, Q, K, * (Joker)
 // Suits: S (Spades), H (Hearts), D (Diamonds), C (Clubs)
-// Example: "AS" = Ace of Spades, "TH" = 10 of Hearts
+// Example: "AS" = Ace of Spades, "TH" = 10 of Hearts, "*S" = Red Joker, "*H" = Black Joker
 
-export const RANKS = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K"] as const;
+export const RANKS = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "*"] as const;
 export const SUITS = ["S", "H", "D", "C"] as const;
 
 export type Rank = (typeof RANKS)[number];
@@ -23,6 +23,12 @@ export interface GameConfig {
   initialRevealCount: number;
   totalRounds: number;
   specialAbilities: boolean;
+  /** Whether Joker cards are included in the deck */
+  includeJokers?: boolean;
+  /** Score for a single Joker in hand (default 15) */
+  jokerSingleScore?: number;
+  /** Score for a pair of Jokers in hand — total, not per card (default −5) */
+  jokerPairScore?: number;
 }
 
 export const DEFAULT_CONFIG: GameConfig = {
@@ -33,6 +39,9 @@ export const DEFAULT_CONFIG: GameConfig = {
   initialRevealCount: 2,
   totalRounds: 9,
   specialAbilities: false,
+  includeJokers: false,
+  jokerSingleScore: 15,
+  jokerPairScore: -5,
 };
 
 export type GameStatus =
@@ -72,6 +81,7 @@ export const CARD_VALUES: Record<Rank, number> = {
   J: 10,
   Q: 10,
   K: 0,
+  "*": 15,
 };
 
 export function getRank(card: Card): Rank {
@@ -80,6 +90,17 @@ export function getRank(card: Card): Rank {
 
 export function getSuit(card: Card): Suit {
   return card[1] as Suit;
+}
+
+/** Returns true if the card is a power card (J, Q, K, or Joker). */
+export function isPowerCard(card: Card): boolean {
+  const rank = getRank(card);
+  return rank === "J" || rank === "Q" || rank === "K" || rank === "*";
+}
+
+/** Returns true if the card is a Joker. */
+export function isJoker(card: Card): boolean {
+  return getRank(card) === "*";
 }
 
 /** The full game state as stored in DB (used by engine) */

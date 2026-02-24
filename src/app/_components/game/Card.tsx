@@ -41,32 +41,59 @@ export function Card({
     xl: "w-32 h-48",
   };
 
-  const cardImage = faceUp && card ? `/cards/${card}.svg` : "/cards/back.svg";
+  const isJoker = faceUp && card !== null && card.startsWith("*");
+  const cardImage = faceUp && card && !isJoker ? `/cards/${card}.svg` : "/cards/back.svg";
+
+  const sharedButtonClass = `
+    ${sizeClasses[size]}
+    relative
+    rounded-lg
+    transition-all
+    duration-200
+    ${selectable ? "cursor-pointer hover:scale-105 hover:shadow-lg" : "cursor-default"}
+    ${matched === "column" ? "matched-card-column" : matched === "row" ? "matched-card-row" : matched === "diagonal" ? "matched-card-diagonal" : matched === "square" ? "matched-card-square" : ""}
+    ${selected ? "ring-4 ring-yellow-400 scale-105 shadow-lg" : ""}
+    ${isDropTarget ? "ring-4 ring-blue-400 scale-110 shadow-lg shadow-blue-500/50" : ""}
+    ${!faceUp && selectable ? "hover:brightness-110" : ""}
+    ${className}
+  `;
+
+  const sharedStyle = {
+    filter: selected
+      ? "drop-shadow(0 0 8px rgba(251, 191, 36, 0.8))"
+      : isDropTarget
+        ? "drop-shadow(0 0 12px rgba(96, 165, 250, 0.8))"
+        : undefined,
+  };
+
+  if (isJoker && card) {
+    const isRed = card[1] === "S"; // "*S" = Red Joker, "*H" = Black Joker
+    return (
+      <button
+        onClick={selectable ? onClick : undefined}
+        disabled={!selectable}
+        className={sharedButtonClass}
+        style={sharedStyle}
+      >
+        <div className="relative w-full h-full rounded-lg bg-white border-2 border-gray-300 flex flex-col items-center justify-center select-none gap-0.5">
+          <span className={`text-2xl leading-none ${isRed ? "text-red-600" : "text-gray-900"}`}>★</span>
+          <span className={`text-xs font-bold tracking-tight ${isRed ? "text-red-500" : "text-gray-700"}`}>Joker</span>
+        </div>
+        {selected && (
+          <div className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-yellow-400 text-xs font-bold text-black">
+            ✓
+          </div>
+        )}
+      </button>
+    );
+  }
 
   return (
     <button
       onClick={selectable ? onClick : undefined}
       disabled={!selectable}
-      className={`
-        ${sizeClasses[size]}
-        relative
-        rounded-lg
-        transition-all
-        duration-200
-        ${selectable ? "cursor-pointer hover:scale-105 hover:shadow-lg" : "cursor-default"}
-        ${matched === "column" ? "matched-card-column" : matched === "row" ? "matched-card-row" : matched === "diagonal" ? "matched-card-diagonal" : matched === "square" ? "matched-card-square" : ""}
-        ${selected ? "ring-4 ring-yellow-400 scale-105 shadow-lg" : ""}
-        ${isDropTarget ? "ring-4 ring-blue-400 scale-110 shadow-lg shadow-blue-500/50" : ""}
-        ${!faceUp && selectable ? "hover:brightness-110" : ""}
-        ${className}
-      `}
-      style={{
-        filter: selected
-          ? "drop-shadow(0 0 8px rgba(251, 191, 36, 0.8))"
-          : isDropTarget
-            ? "drop-shadow(0 0 12px rgba(96, 165, 250, 0.8))"
-            : undefined,
-      }}
+      className={sharedButtonClass}
+      style={sharedStyle}
     >
       <div className="relative w-full h-full">
         <Image

@@ -18,6 +18,8 @@ const SQUARE_BLOCKS: number[][] = [
  * Squares only activate for positive-value ranks (K=0 and 2=−2 are excluded).
  * For other grids: checks columns only.
  *
+ * Jokers (*) never form line or square matches — they use the pair scoring rule instead.
+ *
  * Priority: square > column > row > diagonal (first match per position wins).
  */
 export function getMatchedLineTypes(
@@ -35,6 +37,7 @@ export function getMatchedLineTypes(
 
     if (valid.length !== positions.length) return;
     const firstRank = valid[0]!.slot!.card!.slice(0, 1);
+    if (firstRank === "*") return; // Jokers use pair rule, not line matching
     if (!valid.every(({ slot }) => slot!.card!.startsWith(firstRank))) return;
 
     for (const { pos } of valid) {
@@ -50,6 +53,7 @@ export function getMatchedLineTypes(
         .filter(({ slot }) => slot?.faceUp && slot.card !== null);
       if (valid.length !== 4) continue;
       const firstRank = valid[0]!.slot!.card!.slice(0, 1);
+      if (firstRank === "*") continue; // Jokers use pair rule
       if (!valid.every(({ slot }) => slot!.card!.startsWith(firstRank))) continue;
       if ((CARD_VALUES[firstRank as Rank] ?? 0) <= 0) continue; // K and 2 don't activate
       for (const { pos } of valid) {
@@ -94,6 +98,7 @@ export function calcSquareBonuses(
     const slots = block.map((pos) => hand[pos]);
     if (!slots.every((s) => s?.faceUp && s.card !== null)) continue;
     const firstRank = slots[0]!.card!.slice(0, 1) as Rank;
+    if (firstRank === "*") continue; // Jokers use pair rule
     if (!slots.every((s) => s!.card!.startsWith(firstRank))) continue;
     const rankValue = CARD_VALUES[firstRank] ?? 0;
     if (rankValue <= 0) continue;
@@ -103,12 +108,26 @@ export function calcSquareBonuses(
 }
 
 /**
+ * Score contribution from Jokers in a hand.
+ * - 2+ Jokers: pairScore total for the pair (default −5)
+ * - 1 Joker: singleScore (default +15)
+ * - 0 Jokers: 0
+ */
+export function calcJokerScore(jokerCount: number, singleScore = 15, pairScore = -5): number {
+  if (jokerCount >= 2) return pairScore;
+  if (jokerCount === 1) return singleScore;
+  return 0;
+}
+
+/**
  * Calculate score for a hand.
  * - Classic: if all cards in a column share the same rank, that column scores 0.
  * - 3×3: matched 2×2 squares score 0 per card plus −(rank value) once for the group;
  *   matched columns/rows/diagonals score 0; all other cards score normally.
+ * - Jokers: singleScore individually (default +15), or pairScore as a pair (default −5).
+ *   Jokers never participate in column/row/diagonal/square matches.
  */
-export function calculateScore(hand: PlayerCard[], gridCols: number): number {
+export function calculateScore(hand: PlayerCard[], gridCols: number, jokerSingleScore = 15, jokerPairScore = -5): number {
   const gridRows = hand.length / gridCols;
   const isNineCard = gridRows === 3 && gridCols === 3;
 
@@ -117,9 +136,14 @@ export function calculateScore(hand: PlayerCard[], gridCols: number): number {
     const matchMap = getMatchedLineTypes(asVisible, gridCols);
 
     let total = 0;
+    let jokerCount = 0;
     for (let i = 0; i < hand.length; i++) {
       const card = hand[i];
       if (!card?.card) continue;
+      if (getRank(card.card) === "*") {
+        jokerCount++;
+        continue; // Scored separately below
+      }
       if (!matchMap[i]) {
         total += CARD_VALUES[getRank(card.card)] ?? 0;
       }
@@ -127,16 +151,23 @@ export function calculateScore(hand: PlayerCard[], gridCols: number): number {
     }
     // Add one group bonus per matched square
     total += calcSquareBonuses(asVisible, gridCols);
+    total += calcJokerScore(jokerCount, jokerSingleScore, jokerPairScore);
     return total;
   }
 
   // Classic: columns only
   let total = 0;
+  let jokerCount = 0;
   for (let col = 0; col < gridCols; col++) {
     const columnCards: PlayerCard[] = [];
     for (let row = 0; row < gridRows; row++) {
       const card = hand[row * gridCols + col];
-      if (card && card.card) columnCards.push(card);
+      if (!card?.card) continue;
+      if (getRank(card.card) === "*") {
+        jokerCount++;
+        continue; // Scored separately below
+      }
+      columnCards.push(card);
     }
     if (columnCards.length === 0) continue;
 
@@ -148,5 +179,6 @@ export function calculateScore(hand: PlayerCard[], gridCols: number): number {
       total += CARD_VALUES[getRank(pc.card)] ?? 0;
     }
   }
+  total += calcJokerScore(jokerCount);
   return total;
 }

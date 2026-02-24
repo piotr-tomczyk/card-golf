@@ -75,6 +75,14 @@
     "rounds": "Rundy",
     "fewerRounds": "Mniej rund",
     "moreRounds": "Więcej rund",
+    "powerCards": "Karty specjalne (Cambio)",
+    "powerCardsDesc": "Walet podgląda własną kartę, Dama kartę przeciwnika, Król zamienia karty, Joker zamienia pozycje",
+    "includeJokers": "Dodaj Jokery",
+    "includeJokersDesc": "Dodaje 2 Jokery do talii z konfigurowalnym punktowaniem",
+    "jokerSingleScore": "Pojedynczy Joker",
+    "jokerPairScore": "Para Jokerów (łącznie)",
+    "jokerScoreDecrease": "Zmniejsz punkty",
+    "jokerScoreIncrease": "Zwiększ punkty",
     "creating": "Tworzenie...",
     "createGame": "Utwórz grę",
     "joinGame": "Dołącz do gry",
@@ -137,7 +145,16 @@
     "revealThisCard": "Odkryć tę kartę?",
     "revealCardDesc": "Spowoduje to wykorzystanie twojej tury do odkrycia tej karty.",
     "cancel": "Anuluj",
-    "reveal": "Odkryj"
+    "reveal": "Odkryj",
+    "useAbility": "Użyj zdolności",
+    "placeNormally": "Połóż normalnie",
+    "jackAbility": "Walet — Podglądaj własną",
+    "queenAbility": "Dama — Podglądaj przeciwnika",
+    "kingAbility": "Król — Zamień karty",
+    "jokerAbility": "Joker — Zamień pozycje",
+    "peekModalTitle": "Twój podgląd",
+    "peekModalClose": "Rozumiem",
+    "cancelAbility": "Anuluj zdolność"
   },
   "ActionBar": {
     "waitingForOpponent": "Oczekiwanie na przeciwnika...",
@@ -145,7 +162,14 @@
     "idleHint2": "Dotknij stosu odrzutów, aby wziąć",
     "idleHint3": "Dotknij zakrytej karty, aby odkryć",
     "holdingDrawnCard": "Przeciągnij lub dotknij pozycję w ręce, aby zastąpić, lub odrzuć",
-    "choosingReplacement": "Dotknij kartę na swojej ręce, aby ją zastąpić"
+    "choosingReplacement": "Dotknij kartę na swojej ręce, aby ją zastąpić",
+    "holdingPowerCard": "Karta specjalna! Użyj zdolności, połóż normalnie lub odrzuć",
+    "usingJack": "Wybierz jedną ze swoich zakrytych kart, aby podejrzeć",
+    "usingQueen": "Wybierz zakrytą kartę przeciwnika, aby podejrzeć",
+    "usingKingMine": "Wybierz swoją kartę do zamiany",
+    "usingKingOpponent": "Wybierz kartę przeciwnika do zamiany",
+    "usingJokerFirst": "Wybierz pierwszą kartę przeciwnika do zamiany",
+    "usingJokerSecond": "Wybierz drugą kartę przeciwnika do zamiany"
   },
   "DrawnCard": {
     "youDrew": "Dobrałeś — przeciągnij na pozycję w ręce lub odrzuć",

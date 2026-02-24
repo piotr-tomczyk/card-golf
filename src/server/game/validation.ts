@@ -1,4 +1,5 @@
-import type { GameState, PlayerState } from "./types";
+import { getRank } from "./types";
+import type { Card, GameState, PlayerCard, PlayerState } from "./types";
 
 export class GameError extends Error {
   constructor(message: string) {
@@ -104,4 +105,26 @@ export function validateRevealInitialCards(
   }
 
   return player;
+}
+
+/** Throws if special abilities are not enabled in the game config. */
+export function validateSpecialAbilities(state: GameState): void {
+  if (!state.config.specialAbilities) {
+    throw new GameError("Special abilities not enabled");
+  }
+}
+
+/** Throws if the drawn card is not a power card (J, Q, K, or Joker). */
+export function validateIsPowerCard(drawnCard: Card): void {
+  const rank = getRank(drawnCard);
+  if (rank !== "J" && rank !== "Q" && rank !== "K" && rank !== "*") {
+    throw new GameError("Drawn card is not a power card");
+  }
+}
+
+/** Throws if the card at the given position in hand is face up. */
+export function validateIsFaceDown(hand: PlayerCard[], position: number): void {
+  if (hand[position]?.faceUp) {
+    throw new GameError("Card is already face up");
+  }
 }

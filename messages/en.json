@@ -75,6 +75,14 @@
     "rounds": "Rounds",
     "fewerRounds": "Fewer rounds",
     "moreRounds": "More rounds",
+    "powerCards": "Power Cards (Cambio)",
+    "powerCardsDesc": "J peeks own card, Q peeks opponent's, K swaps cards, Joker swaps opponent positions",
+    "includeJokers": "Include Jokers",
+    "includeJokersDesc": "Adds 2 Jokers to the deck with configurable scoring",
+    "jokerSingleScore": "Single Joker",
+    "jokerPairScore": "Joker Pair (total)",
+    "jokerScoreDecrease": "Decrease score",
+    "jokerScoreIncrease": "Increase score",
     "creating": "Creating...",
     "createGame": "Create Game",
     "joinGame": "Join Game",
@@ -137,7 +145,16 @@
     "revealThisCard": "Reveal this card?",
     "revealCardDesc": "This will use your turn to flip this card face up.",
     "cancel": "Cancel",
-    "reveal": "Reveal"
+    "reveal": "Reveal",
+    "useAbility": "Use Ability",
+    "placeNormally": "Place Normally",
+    "jackAbility": "Jack — Peek Own",
+    "queenAbility": "Queen — Peek Opponent",
+    "kingAbility": "King — Swap Cards",
+    "jokerAbility": "Joker — Swap Positions",
+    "peekModalTitle": "Your peek",
+    "peekModalClose": "Got it",
+    "cancelAbility": "Cancel Ability"
   },
   "ActionBar": {
     "waitingForOpponent": "Waiting for opponent...",
@@ -145,7 +162,14 @@
     "idleHint2": "Tap discard to take",
     "idleHint3": "Tap face-down card to reveal",
     "holdingDrawnCard": "Drag or tap a hand position to replace, or discard",
-    "choosingReplacement": "Tap a card in your hand to replace it"
+    "choosingReplacement": "Tap a card in your hand to replace it",
+    "holdingPowerCard": "Power card! Use its ability, place it normally, or discard",
+    "usingJack": "Select one of your face-down cards to peek at",
+    "usingQueen": "Select one of your opponent's face-down cards to peek at",
+    "usingKingMine": "Select one of your cards to swap",
+    "usingKingOpponent": "Now select one of your opponent's cards to swap with",
+    "usingJokerFirst": "Select the first opponent card position to swap",
+    "usingJokerSecond": "Select the second opponent card position to swap"
   },
   "DrawnCard": {
     "youDrew": "You drew — drag to a hand position or discard",
