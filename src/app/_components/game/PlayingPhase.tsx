@@ -432,7 +432,16 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
               currentRound={game.currentRound}
               totalRounds={totalRounds}
               isFinalTurn={game.status === "final_turn"}
-              helpButton={<HowToPlay compact variant={game.config.gridRows === 3 ? "nine-card" : "classic"} />}
+              helpButton={
+                <HowToPlay
+                  compact
+                  variant={game.config.gridRows === 3 ? "nine-card" : "classic"}
+                  specialAbilities={game.config.specialAbilities}
+                  includeJokers={game.config.includeJokers}
+                  jokerSingleScore={game.config.jokerSingleScore}
+                  jokerPairScore={game.config.jokerPairScore}
+                />
+              }
             />
 
             {/* Score Strip - always-visible on mobile so you don't need to scroll */}

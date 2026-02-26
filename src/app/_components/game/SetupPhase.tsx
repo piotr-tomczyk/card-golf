@@ -98,7 +98,14 @@ export function SetupPhase({ game, refetch, userId }: SetupPhaseProps) {
           </h1>
           <p className="text-xl text-green-200">{t("round", { n: game.currentRound })}</p>
           <div className="absolute top-0 right-0">
-            <HowToPlay compact variant={game.config.gridRows === 3 ? "nine-card" : "classic"} />
+            <HowToPlay
+              compact
+              variant={game.config.gridRows === 3 ? "nine-card" : "classic"}
+              specialAbilities={game.config.specialAbilities}
+              includeJokers={game.config.includeJokers}
+              jokerSingleScore={game.config.jokerSingleScore}
+              jokerPairScore={game.config.jokerPairScore}
+            />
           </div>
         </div>
 

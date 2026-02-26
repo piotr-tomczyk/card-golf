@@ -515,16 +515,188 @@ function NineCardRules({ t }: { t: ReturnType<typeof useTranslations<"HowToPlay"
   );
 }
 
+// ─── Power Cards section ──────────────────────────────────────────────────────
+
+function MiniJokerCard({ color }: { color: "red" | "black" }) {
+  return (
+    <div
+      className={`h-[2.4rem] w-[1.7rem] flex-shrink-0 rounded flex items-center justify-center text-sm font-bold shadow border ${
+        color === "red"
+          ? "bg-red-950 border-red-500/40 text-red-400"
+          : "bg-neutral-900 border-neutral-600/40 text-neutral-300"
+      }`}
+    >
+      ★
+    </div>
+  );
+}
+
+function PowerCardsSection({
+  t,
+  hasJokers,
+}: {
+  t: ReturnType<typeof useTranslations<"HowToPlay">>;
+  hasJokers: boolean;
+}) {
+  const abilities: Array<{
+    card: React.ReactNode;
+    title: string;
+    body: string;
+  }> = [
+    {
+      card: <MiniCard rank="J" suit="H" />,
+      title: t("jackTitle"),
+      body: t("jackBody"),
+    },
+    {
+      card: <MiniCard rank="Q" suit="S" />,
+      title: t("queenTitle"),
+      body: t("queenBody"),
+    },
+    {
+      card: <MiniCard rank="K" suit="C" />,
+      title: t("kingTitle"),
+      body: t("kingBody"),
+    },
+    ...(hasJokers
+      ? [
+          {
+            card: <MiniJokerCard color="red" />,
+            title: t("jokerAbilityTitle"),
+            body: t("jokerAbilityBody"),
+          },
+        ]
+      : []),
+  ];
+
+  return (
+    <div className="rounded-xl border border-violet-700/30 bg-violet-950/20 p-4 space-y-4">
+      <div className="flex items-center gap-2">
+        <span className="text-base leading-none">⚡</span>
+        <h3
+          className="text-[0.95rem] font-semibold tracking-wide text-violet-300"
+          style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}
+        >
+          {t("powerCardsTitle")}
+        </h3>
+        <span className="ml-auto rounded-full border border-violet-600/40 bg-violet-900/50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-violet-400">
+          {t("activeBadge")}
+        </span>
+      </div>
+      <p className="text-sm text-green-200/90 leading-relaxed">{t("powerCardsIntro")}</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        {abilities.map((ability, i) => (
+          <div key={i} className="flex gap-2.5 rounded-lg bg-green-900/40 p-3">
+            <div className="flex-shrink-0">{ability.card}</div>
+            <div>
+              <p className="text-[11px] font-semibold text-violet-300 mb-0.5">{ability.title}</p>
+              <p className="text-xs text-green-300 leading-relaxed">{ability.body}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+      <p className="text-xs italic text-green-500">{t("powerCardsNote")}</p>
+    </div>
+  );
+}
+
+// ─── Jokers section ───────────────────────────────────────────────────────────
+
+function JokersSection({
+  t,
+  singleScore = 15,
+  pairScore = -5,
+}: {
+  t: ReturnType<typeof useTranslations<"HowToPlay">>;
+  singleScore?: number;
+  pairScore?: number;
+}) {
+  const singleIsGood = singleScore < 0;
+  const pairIsGood = pairScore < 0;
+
+  return (
+    <div className="rounded-xl border border-amber-700/30 bg-amber-950/10 p-4 space-y-4">
+      <div className="flex items-center gap-2">
+        <span className="text-base leading-none">★</span>
+        <h3
+          className="text-[0.95rem] font-semibold tracking-wide text-amber-300"
+          style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}
+        >
+          {t("jokersTitle")}
+        </h3>
+        <span className="ml-auto rounded-full border border-amber-600/40 bg-amber-900/50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-amber-500">
+          {t("activeBadge")}
+        </span>
+      </div>
+      <p className="text-sm text-green-200/90 leading-relaxed">{t("jokersIntro")}</p>
+      <div className="grid grid-cols-2 gap-3">
+        {/* Single Joker */}
+        <div
+          className={`rounded-lg border p-3 flex flex-col items-center gap-2 text-center ${
+            singleIsGood
+              ? "border-emerald-800/30 bg-emerald-950/30"
+              : "border-red-800/30 bg-red-950/20"
+          }`}
+        >
+          <MiniJokerCard color="red" />
+          <p className="text-[10px] font-semibold text-green-400">{t("jokerSingleLabel")}</p>
+          <span
+            className={`rounded px-2 py-0.5 text-[11px] font-bold ${
+              singleIsGood
+                ? "bg-emerald-900/50 text-emerald-300"
+                : "bg-red-900/50 text-red-300"
+            }`}
+          >
+            {t("jokerSinglePts", { score: singleScore })}
+          </span>
+        </div>
+        {/* Joker pair */}
+        <div
+          className={`rounded-lg border p-3 flex flex-col items-center gap-2 text-center ${
+            pairIsGood
+              ? "border-emerald-800/30 bg-emerald-950/30"
+              : "border-red-800/30 bg-red-950/20"
+          }`}
+        >
+          <div className="flex gap-1">
+            <MiniJokerCard color="red" />
+            <MiniJokerCard color="black" />
+          </div>
+          <p className="text-[10px] font-semibold text-green-400">{t("jokerPairLabel")}</p>
+          <span
+            className={`rounded px-2 py-0.5 text-[11px] font-bold ${
+              pairIsGood
+                ? "bg-emerald-900/50 text-emerald-300"
+                : "bg-red-900/50 text-red-300"
+            }`}
+          >
+            {t("jokerPairPts", { score: pairScore })}
+          </span>
+        </div>
+      </div>
+      <p className="text-xs italic text-green-500">{t("jokerPairBody")}</p>
+    </div>
+  );
+}
+
 // ─── Modal content ────────────────────────────────────────────────────────────
 
 function HowToPlayModal({
   onClose,
   defaultVariant = "classic",
   showTabs = false,
+  specialAbilities = false,
+  includeJokers = false,
+  jokerSingleScore = 15,
+  jokerPairScore = -5,
 }: {
   onClose: () => void;
   defaultVariant?: "classic" | "nine-card";
   showTabs?: boolean;
+  specialAbilities?: boolean;
+  includeJokers?: boolean;
+  jokerSingleScore?: number;
+  jokerPairScore?: number;
 }) {
   const t = useTranslations("HowToPlay");
   const [activeVariant, setActiveVariant] = useState<"classic" | "nine-card">(defaultVariant);
@@ -611,6 +783,21 @@ function HowToPlayModal({
               {activeVariant === "nine-card" ? t("nineCardSubtitle") : t("subtitle")}
             </p>
           )}
+          {/* Active variant badges */}
+          {(specialAbilities || includeJokers) && (
+            <div className="mt-2 flex justify-center gap-1.5 flex-wrap">
+              {specialAbilities && (
+                <span className="rounded-full border border-violet-600/50 bg-violet-900/40 px-2.5 py-0.5 text-[10px] font-semibold text-violet-300">
+                  ⚡ {t("powerCardsTitle")}
+                </span>
+              )}
+              {includeJokers && (
+                <span className="rounded-full border border-amber-600/50 bg-amber-900/40 px-2.5 py-0.5 text-[10px] font-semibold text-amber-300">
+                  ★ {t("jokersTitle")}
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Rules content */}
@@ -619,6 +806,29 @@ function HowToPlayModal({
             <NineCardRules t={t} />
           ) : (
             <ClassicRules t={t} />
+          )}
+
+          {/* Add-on variant sections */}
+          {(specialAbilities || includeJokers) && (
+            <div className="space-y-5">
+              <div className="flex items-center gap-3">
+                <div className="flex-1 border-t border-amber-700/30" />
+                <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-amber-600/70">
+                  {t("variantRules")}
+                </span>
+                <div className="flex-1 border-t border-amber-700/30" />
+              </div>
+              {specialAbilities && (
+                <PowerCardsSection t={t} hasJokers={includeJokers} />
+              )}
+              {includeJokers && (
+                <JokersSection
+                  t={t}
+                  singleScore={jokerSingleScore}
+                  pairScore={jokerPairScore}
+                />
+              )}
+            </div>
           )}
         </div>
 
@@ -637,9 +847,17 @@ function HowToPlayModal({
 export function HowToPlay({
   compact = false,
   variant = "classic",
+  specialAbilities = false,
+  includeJokers = false,
+  jokerSingleScore = 15,
+  jokerPairScore = -5,
 }: {
   compact?: boolean;
   variant?: "classic" | "nine-card";
+  specialAbilities?: boolean;
+  includeJokers?: boolean;
+  jokerSingleScore?: number;
+  jokerPairScore?: number;
 }) {
   const [open, setOpen] = useState(false);
   const t = useTranslations("HowToPlay");
@@ -675,6 +893,10 @@ export function HowToPlay({
           onClose={close}
           defaultVariant={variant}
           showTabs={!compact}
+          specialAbilities={specialAbilities}
+          includeJokers={includeJokers}
+          jokerSingleScore={jokerSingleScore}
+          jokerPairScore={jokerPairScore}
         />
       )}
     </>

@@ -55,7 +55,14 @@ export function GameLobby({ game }: GameLobbyProps) {
             {t("waitingForPlayers")}
           </p>
           <div className="absolute top-0 right-0">
-            <HowToPlay compact />
+            <HowToPlay
+              compact
+              variant={game.config.gridRows === 3 ? "nine-card" : "classic"}
+              specialAbilities={game.config.specialAbilities}
+              includeJokers={game.config.includeJokers}
+              jokerSingleScore={game.config.jokerSingleScore}
+              jokerPairScore={game.config.jokerPairScore}
+            />
           </div>
         </div>
 
