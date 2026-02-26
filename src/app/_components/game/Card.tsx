@@ -16,7 +16,7 @@ export interface CardProps {
   /** Whether a drag is hovering over this card (drop target) */
   isDropTarget?: boolean;
   /** Which type of match this card is part of (false = no match) */
-  matched?: "column" | "row" | "diagonal" | "square" | false;
+  matched?: "column" | "row" | "diagonal" | "square" | "joker_pair" | false;
   /** Size variant */
   size?: "sm" | "md" | "lg" | "xl";
   /** Additional CSS classes */
@@ -55,7 +55,7 @@ export function Card({
     transition-all
     duration-200
     ${selectable ? "cursor-pointer hover:scale-105 hover:shadow-lg" : "cursor-default"}
-    ${matched === "column" ? "matched-card-column" : matched === "row" ? "matched-card-row" : matched === "diagonal" ? "matched-card-diagonal" : matched === "square" ? "matched-card-square" : ""}
+    ${matched === "column" ? "matched-card-column" : matched === "row" ? "matched-card-row" : matched === "diagonal" ? "matched-card-diagonal" : matched === "square" ? "matched-card-square" : matched === "joker_pair" ? "matched-card-joker" : ""}
     ${selected ? "ring-4 ring-yellow-400 scale-105 shadow-lg" : ""}
     ${isDropTarget ? "ring-4 ring-blue-400 scale-110 shadow-lg shadow-blue-500/50" : ""}
     ${!faceUp && selectable ? "hover:brightness-110" : ""}

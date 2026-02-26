@@ -22,7 +22,7 @@ export interface PlayerHandProps {
   /** Grid size (2x3 = 6 cards, 3x3 = 9 cards) */
   gridSize?: { rows: number; cols: number };
   /** Map of position → match type for highlighted cards */
-  matchedPositions?: Record<number, "column" | "row" | "diagonal" | "square">;
+  matchedPositions?: Record<number, "column" | "row" | "diagonal" | "square" | "joker_pair">;
   /** Card size */
   size?: "sm" | "md" | "lg" | "xl";
 }

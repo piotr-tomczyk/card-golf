@@ -208,6 +208,65 @@
   pointer-events: none;
 }
 
+/* ── Joker pair — rainbow/multicolor ────────────────────────────────────── */
+
+.matched-card-joker {
+  position: relative;
+}
+
+.matched-card-joker::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 10px;
+  padding: 3px;
+  background: conic-gradient(
+    from var(--matched-angle),
+    #f87171,
+    #fb923c,
+    #facc15,
+    #4ade80,
+    #38bdf8,
+    #a78bfa,
+    #f472b6,
+    #f87171
+  );
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  animation: matched-border-spin 2s linear infinite;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.matched-card-joker::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 14px;
+  background: conic-gradient(
+    from var(--matched-angle),
+    rgba(248, 113, 113, 0.5),
+    rgba(251, 146, 60, 0.15),
+    rgba(250, 204, 21, 0.5),
+    rgba(74, 222, 128, 0.15),
+    rgba(56, 189, 248, 0.5),
+    rgba(167, 139, 250, 0.15),
+    rgba(244, 114, 182, 0.5),
+    rgba(248, 113, 113, 0.15)
+  );
+  filter: blur(10px);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  padding: 6px;
+  animation: matched-border-spin 2s linear infinite;
+  z-index: 0;
+  pointer-events: none;
+}
+
 /* ── Diagonal match — violet/purple ─────────────────────────────────────── */
 
 .matched-card-diagonal {

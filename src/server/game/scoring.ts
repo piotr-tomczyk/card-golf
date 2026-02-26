@@ -1,6 +1,6 @@
 import { CARD_VALUES, getRank, type PlayerCard, type Rank } from "./types";
 
-export type MatchType = "column" | "row" | "diagonal" | "square";
+export type MatchType = "column" | "row" | "diagonal" | "square" | "joker_pair";
 
 /** The four 2×2 blocks in a 3×3 grid (by position index). */
 const SQUARE_BLOCKS: number[][] = [
@@ -77,6 +77,17 @@ export function getMatchedLineTypes(
       const positions: number[] = [];
       for (let row = 0; row < gridRows; row++) positions.push(row * gridCols + col);
       checkLine(positions, "column");
+    }
+  }
+
+  // Joker pair — mark both positions when 2+ face-up Jokers exist
+  const jokerPositions = hand
+    .map((slot, i) => ({ i, slot }))
+    .filter(({ slot }) => slot?.faceUp && slot.card !== null && slot.card.startsWith("*"))
+    .map(({ i }) => i);
+  if (jokerPositions.length >= 2) {
+    for (const pos of jokerPositions) {
+      if (!(pos in result)) result[pos] = "joker_pair";
     }
   }
 
