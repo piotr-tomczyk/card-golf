@@ -174,7 +174,8 @@
     "jokerAbility": "Joker — Zamień pozycje",
     "peekModalTitle": "Twój podgląd",
     "peekModalClose": "Rozumiem",
-    "cancelAbility": "Anuluj zdolność"
+    "cancelAbility": "Anuluj zdolność",
+    "discard": "Odrzuć"
   },
   "ActionBar": {
     "waitingForOpponent": "Oczekiwanie na przeciwnika...",

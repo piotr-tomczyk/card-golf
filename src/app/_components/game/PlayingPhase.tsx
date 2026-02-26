@@ -539,7 +539,7 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
                       disabled={isPending}
                       className="rounded-lg border border-dashed border-red-500/60 px-4 py-2 text-sm font-semibold text-red-300 transition hover:bg-red-900/30 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Discard
+                      {t("discard")}
                     </button>
                   </div>
                 </div>

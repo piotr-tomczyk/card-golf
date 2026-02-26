@@ -174,7 +174,8 @@
     "jokerAbility": "Joker — Swap Positions",
     "peekModalTitle": "Your peek",
     "peekModalClose": "Got it",
-    "cancelAbility": "Cancel Ability"
+    "cancelAbility": "Cancel Ability",
+    "discard": "Discard"
   },
   "ActionBar": {
     "waitingForOpponent": "Waiting for opponent...",

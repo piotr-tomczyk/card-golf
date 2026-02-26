@@ -26,4 +26,4 @@
 [x] Add docs for special variants and display them additionally when the game is a given type
 [x] Better art for Joker
 [x] Make a special outline for a pair of Jokers
-[] Discard in special card pickup not translated to Polish
+[x] Discard in special card pickup not translated to Polish
