@@ -42,7 +42,11 @@ export function Card({
   };
 
   const isJoker = faceUp && card !== null && card.startsWith("*");
-  const cardImage = faceUp && card && !isJoker ? `/cards/${card}.svg` : "/cards/back.svg";
+  const cardImage = !faceUp || !card
+    ? "/cards/back.svg"
+    : isJoker
+      ? (card === "*S" ? "/cards/joker_red.svg" : "/cards/joker_black.svg")
+      : `/cards/${card}.svg`;
 
   const sharedButtonClass = `
     ${sizeClasses[size]}
@@ -65,28 +69,6 @@ export function Card({
         ? "drop-shadow(0 0 12px rgba(96, 165, 250, 0.8))"
         : undefined,
   };
-
-  if (isJoker && card) {
-    const isRed = card[1] === "S"; // "*S" = Red Joker, "*H" = Black Joker
-    return (
-      <button
-        onClick={selectable ? onClick : undefined}
-        disabled={!selectable}
-        className={sharedButtonClass}
-        style={sharedStyle}
-      >
-        <div className="relative w-full h-full rounded-lg bg-white border-2 border-gray-300 flex flex-col items-center justify-center select-none gap-0.5">
-          <span className={`text-2xl leading-none ${isRed ? "text-red-600" : "text-gray-900"}`}>★</span>
-          <span className={`text-xs font-bold tracking-tight ${isRed ? "text-red-500" : "text-gray-700"}`}>Joker</span>
-        </div>
-        {selected && (
-          <div className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-yellow-400 text-xs font-bold text-black">
-            ✓
-          </div>
-        )}
-      </button>
-    );
-  }
 
   return (
     <button

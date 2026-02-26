@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="224.225" height="312.808" viewBox="0 0 224.225 312.808">
+  <!-- Card background -->
+  <rect rx="10.63" ry="10.63" x="0.498" y="0.498" width="223.228" height="311.811"
+        fill="#ffffff" stroke="#000000" stroke-width="0.997"/>
+
+  <!-- Inner decorative border -->
+  <rect rx="6" ry="6" x="10" y="10" width="204.2" height="292.8"
+        fill="none" stroke="#222222" stroke-width="0.6" opacity="0.12"/>
+
+  <!-- Top-left corner rank -->
+  <g transform="translate(14, 10)">
+    <text x="0" y="22" font-family="Georgia, 'Times New Roman', serif" font-weight="bold"
+          font-size="22" fill="#222222">★</text>
+    <text x="1" y="35" font-family="Georgia, 'Times New Roman', serif" font-weight="bold"
+          font-size="9" fill="#222222">JKR</text>
+  </g>
+
+  <!-- Bottom-right corner rank (rotated 180) -->
+  <g transform="rotate(180 112.11 156.4)">
+    <g transform="translate(14, 10)">
+      <text x="0" y="22" font-family="Georgia, 'Times New Roman', serif" font-weight="bold"
+            font-size="22" fill="#222222">★</text>
+      <text x="1" y="35" font-family="Georgia, 'Times New Roman', serif" font-weight="bold"
+            font-size="9" fill="#222222">JKR</text>
+    </g>
+  </g>
+
+  <!-- === JESTER HAT === -->
+  <!-- Main hat shape - three flowing points -->
+  <path d="
+    M 65,185
+    C 60,158 54,130 52,108
+    Q 50,90 56,92
+    C 63,95 70,112 77,130
+    Q 83,143 91,150
+    C 96,132 102,108 107,85
+    Q 110,70 112,63
+    Q 114,70 117,85
+    C 122,108 128,132 133,150
+    Q 141,143 147,130
+    C 154,112 161,95 168,92
+    Q 174,90 172,108
+    C 170,130 164,158 159,185
+    Q 112,198 65,185
+    Z" fill="#222222"/>
+
+  <!-- Hat section divider lines -->
+  <path d="M 91,150 Q 88,167 84,185" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.2"/>
+  <path d="M 133,150 Q 136,167 140,185" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.2"/>
+
+  <!-- Hat band -->
+  <ellipse cx="112" cy="186" rx="49" ry="5" fill="#222222" opacity="0.35"/>
+
+  <!-- Bells at hat tips -->
+  <circle cx="53" cy="89" r="8" fill="#222222"/>
+  <circle cx="112" cy="58" r="8" fill="#222222"/>
+  <circle cx="171" cy="89" r="8" fill="#222222"/>
+  <!-- Bell highlights -->
+  <circle cx="50" cy="86" r="3" fill="#ffffff" opacity="0.55"/>
+  <circle cx="109" cy="55" r="3" fill="#ffffff" opacity="0.55"/>
+  <circle cx="168" cy="86" r="3" fill="#ffffff" opacity="0.55"/>
+  <!-- Bell bottoms (small dangles) -->
+  <circle cx="53" cy="98" r="3" fill="#222222" opacity="0.6"/>
+  <circle cx="112" cy="67" r="3" fill="#222222" opacity="0.6"/>
+  <circle cx="171" cy="98" r="3" fill="#222222" opacity="0.6"/>
+
+  <!-- === JOKER TEXT === -->
+  <text x="112" y="228" text-anchor="middle"
+        font-family="Georgia, 'Times New Roman', serif" font-weight="bold"
+        font-size="24" letter-spacing="4" fill="#222222">JOKER</text>
+
+  <!-- Decorative diamond below text -->
+  <path d="M 112,243 L 119,253 L 112,263 L 105,253 Z" fill="#222222"/>
+
+  <!-- Small accent dots -->
+  <circle cx="80" cy="275" r="2.2" fill="#222222" opacity="0.25"/>
+  <circle cx="112" cy="279" r="2.2" fill="#222222" opacity="0.25"/>
+  <circle cx="144" cy="275" r="2.2" fill="#222222" opacity="0.25"/>
+</svg>

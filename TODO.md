@@ -24,6 +24,6 @@
 [x] Make how to play a modal and add ability to display it during the game as well
 [x] Add 3x3 variant
 [x] Add docs for special variants and display them additionally when the game is a given type
-[] Better art for Joker
+[x] Better art for Joker
 [] Make a special outline for a pair of Jokers
 [] Discard in special card pickup not translated to Polish
