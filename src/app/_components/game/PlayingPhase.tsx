@@ -169,6 +169,17 @@ export function PlayingPhase({ game, refetch, userId }: PlayingPhaseProps) {
     }
   }, [isYourTurn, game.turnNumber]);
 
+  // Restore turnState from backend after page refresh
+  useEffect(() => {
+    if (turnState === "idle" && isYourTurn && game.drawnCard) {
+      if (game.config.specialAbilities && isPowerCard(game.drawnCard)) {
+        setTurnState("holding_power_card");
+      } else {
+        setTurnState("holding_drawn_card");
+      }
+    }
+  }, [game.drawnCard, isYourTurn, turnState, game.config.specialAbilities]);
+
   if (!currentPlayer || !currentTurnPlayer) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-green-800 to-green-950 text-white">
