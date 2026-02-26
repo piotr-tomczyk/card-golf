@@ -4,77 +4,105 @@
   <rect rx="10.63" ry="10.63" x="0.498" y="0.498" width="223.228" height="311.811"
         fill="#ffffff" stroke="#000000" stroke-width="0.997"/>
 
-  <!-- Inner decorative border -->
-  <rect rx="6" ry="6" x="10" y="10" width="204.2" height="292.8"
-        fill="none" stroke="#222222" stroke-width="0.6" opacity="0.12"/>
-
   <!-- Top-left corner rank -->
   <g transform="translate(14, 10)">
     <text x="0" y="22" font-family="Georgia, 'Times New Roman', serif" font-weight="bold"
-          font-size="22" fill="#222222">★</text>
+          font-size="22" fill="#1a1a1a">★</text>
     <text x="1" y="35" font-family="Georgia, 'Times New Roman', serif" font-weight="bold"
-          font-size="9" fill="#222222">JKR</text>
+          font-size="9" fill="#1a1a1a">JKR</text>
   </g>
 
   <!-- Bottom-right corner rank (rotated 180) -->
   <g transform="rotate(180 112.11 156.4)">
     <g transform="translate(14, 10)">
       <text x="0" y="22" font-family="Georgia, 'Times New Roman', serif" font-weight="bold"
-            font-size="22" fill="#222222">★</text>
+            font-size="22" fill="#1a1a1a">★</text>
       <text x="1" y="35" font-family="Georgia, 'Times New Roman', serif" font-weight="bold"
-            font-size="9" fill="#222222">JKR</text>
+            font-size="9" fill="#1a1a1a">JKR</text>
     </g>
   </g>
 
-  <!-- === JESTER HAT === -->
-  <!-- Main hat shape - three flowing points -->
+  <!-- ===== JESTER CHARACTER ===== -->
+
+  <!-- Jester hat (three points with bells, sits on head) -->
   <path d="
-    M 65,185
-    C 60,158 54,130 52,108
-    Q 50,90 56,92
-    C 63,95 70,112 77,130
-    Q 83,143 91,150
-    C 96,132 102,108 107,85
-    Q 110,70 112,63
-    Q 114,70 117,85
-    C 122,108 128,132 133,150
-    Q 141,143 147,130
-    C 154,112 161,95 168,92
-    Q 174,90 172,108
-    C 170,130 164,158 159,185
-    Q 112,198 65,185
-    Z" fill="#222222"/>
+    M 82,107
+    Q 68,72 56,50
+    Q 53,44 58,48
+    Q 72,62 86,94
+    Q 92,105 98,102
+    Q 104,62 112,38
+    Q 116,30 120,42
+    Q 126,65 128,102
+    Q 134,105 138,94
+    Q 152,62 166,48
+    Q 171,44 168,50
+    Q 156,72 142,107
+    Q 112,118 82,107
+    Z" fill="#1a1a1a"/>
 
-  <!-- Hat section divider lines -->
-  <path d="M 91,150 Q 88,167 84,185" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.2"/>
-  <path d="M 133,150 Q 136,167 140,185" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.2"/>
-
-  <!-- Hat band -->
-  <ellipse cx="112" cy="186" rx="49" ry="5" fill="#222222" opacity="0.35"/>
+  <!-- Hat section dividers -->
+  <path d="M 98,102 Q 95,108 92,114" fill="none" stroke="#ffffff" stroke-width="0.8" opacity="0.2"/>
+  <path d="M 128,102 Q 131,108 134,114" fill="none" stroke="#ffffff" stroke-width="0.8" opacity="0.2"/>
 
   <!-- Bells at hat tips -->
-  <circle cx="53" cy="89" r="8" fill="#222222"/>
-  <circle cx="112" cy="58" r="8" fill="#222222"/>
-  <circle cx="171" cy="89" r="8" fill="#222222"/>
+  <circle cx="55" cy="46" r="7" fill="#1a1a1a"/>
+  <circle cx="112" cy="33" r="7" fill="#1a1a1a"/>
+  <circle cx="169" cy="46" r="7" fill="#1a1a1a"/>
   <!-- Bell highlights -->
-  <circle cx="50" cy="86" r="3" fill="#ffffff" opacity="0.55"/>
-  <circle cx="109" cy="55" r="3" fill="#ffffff" opacity="0.55"/>
-  <circle cx="168" cy="86" r="3" fill="#ffffff" opacity="0.55"/>
-  <!-- Bell bottoms (small dangles) -->
-  <circle cx="53" cy="98" r="3" fill="#222222" opacity="0.6"/>
-  <circle cx="112" cy="67" r="3" fill="#222222" opacity="0.6"/>
-  <circle cx="171" cy="98" r="3" fill="#222222" opacity="0.6"/>
+  <circle cx="53" cy="44" r="2.5" fill="#ffffff" opacity="0.45"/>
+  <circle cx="110" cy="31" r="2.5" fill="#ffffff" opacity="0.45"/>
+  <circle cx="167" cy="44" r="2.5" fill="#ffffff" opacity="0.45"/>
 
-  <!-- === JOKER TEXT === -->
-  <text x="112" y="228" text-anchor="middle"
+  <!-- Face -->
+  <ellipse cx="112" cy="136" rx="30" ry="32" fill="#f0e6dc" stroke="#1a1a1a" stroke-width="2.2"/>
+
+  <!-- Eyebrows (arched, playful) -->
+  <path d="M 94,120 Q 101,113 109,120" fill="none" stroke="#1a1a1a" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M 115,120 Q 123,113 130,120" fill="none" stroke="#1a1a1a" stroke-width="2.2" stroke-linecap="round"/>
+
+  <!-- Eye whites -->
+  <ellipse cx="101" cy="129" rx="7" ry="8" fill="#ffffff" stroke="#1a1a1a" stroke-width="1.2"/>
+  <ellipse cx="123" cy="129" rx="7" ry="8" fill="#ffffff" stroke="#1a1a1a" stroke-width="1.2"/>
+  <!-- Pupils -->
+  <circle cx="103" cy="130" r="3.5" fill="#1a1a1a"/>
+  <circle cx="125" cy="130" r="3.5" fill="#1a1a1a"/>
+  <!-- Pupil glints -->
+  <circle cx="105" cy="128" r="1.3" fill="#ffffff"/>
+  <circle cx="127" cy="128" r="1.3" fill="#ffffff"/>
+
+  <!-- Round clown nose -->
+  <circle cx="112" cy="142" r="5.5" fill="#1a1a1a"/>
+  <circle cx="110" cy="140" r="1.8" fill="#ffffff" opacity="0.35"/>
+
+  <!-- Cheeks -->
+  <circle cx="89" cy="142" r="6" fill="#c4b0a0" opacity="0.3"/>
+  <circle cx="135" cy="142" r="6" fill="#c4b0a0" opacity="0.3"/>
+
+  <!-- Wide grin -->
+  <path d="M 96,152 Q 104,164 112,161 Q 120,164 128,152" fill="none" stroke="#1a1a1a" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Ruffled collar -->
+  <path d="M 78,170 Q 85,183 93,170 Q 99,183 107,170 Q 112,183 119,170 Q 126,183 133,170 Q 139,183 146,170"
+        fill="none" stroke="#1a1a1a" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Body (torso with harlequin diamonds) -->
+  <path d="M 84,182 L 78,242 Q 112,252 146,242 L 140,182 Q 112,192 84,182 Z"
+        fill="#1a1a1a" opacity="0.85"/>
+
+  <!-- Diamond pattern on body -->
+  <path d="M 112,190 L 122,204 L 112,218 L 102,204 Z" fill="#ffffff" opacity="0.25"/>
+  <path d="M 112,216 L 119,228 L 112,240 L 105,228 Z" fill="#ffffff" opacity="0.2"/>
+  <path d="M 96,196 L 103,206 L 96,216 L 89,206 Z" fill="#ffffff" opacity="0.18"/>
+  <path d="M 128,196 L 135,206 L 128,216 L 121,206 Z" fill="#ffffff" opacity="0.18"/>
+
+  <!-- JOKER text -->
+  <text x="112" y="270" text-anchor="middle"
         font-family="Georgia, 'Times New Roman', serif" font-weight="bold"
-        font-size="24" letter-spacing="4" fill="#222222">JOKER</text>
-
-  <!-- Decorative diamond below text -->
-  <path d="M 112,243 L 119,253 L 112,263 L 105,253 Z" fill="#222222"/>
+        font-size="20" letter-spacing="3" fill="#1a1a1a">JOKER</text>
 
   <!-- Small accent dots -->
-  <circle cx="80" cy="275" r="2.2" fill="#222222" opacity="0.25"/>
-  <circle cx="112" cy="279" r="2.2" fill="#222222" opacity="0.25"/>
-  <circle cx="144" cy="275" r="2.2" fill="#222222" opacity="0.25"/>
+  <circle cx="85" cy="286" r="1.8" fill="#1a1a1a" opacity="0.2"/>
+  <circle cx="112" cy="288" r="1.8" fill="#1a1a1a" opacity="0.2"/>
+  <circle cx="139" cy="286" r="1.8" fill="#1a1a1a" opacity="0.2"/>
 </svg>
